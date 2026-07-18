@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXA·Code-X</title>
+<title>NEXA · Code-X</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -312,7 +312,7 @@
         <button class="key-toggle" onclick="toggleKeyBar()">API key</button>
       </div>
       <div class="key-bar" id="keyBar">
-        <input type="password" id="apiKeyInput" placeholder="OpenAI API key (sk-...)">
+        <input type="password" id="apiKeyInput" placeholder="xAI API key (xai-...)">
         <button class="btn" onclick="saveKey()">Save</button>
       </div>
       <div class="chat-log" id="chatLog">
@@ -442,7 +442,7 @@
      CHAT + VOICE + VISION + APP-DEEP-LINKS
      ========================================================= */
 
-  let OPENAI_KEY = localStorage.getItem("nexa_openai_key") || "";
+  let XAI_KEY = localStorage.getItem("nexa_xai_key") || "";
   let history = []; // {role, content}
 
   const APP_LINKS = {
@@ -457,8 +457,8 @@
   };
 
   function initChat(){
-    if(OPENAI_KEY){
-      document.getElementById("apiKeyInput").value = OPENAI_KEY;
+    if(XAI_KEY){
+      document.getElementById("apiKeyInput").value = XAI_KEY;
     } else {
       toggleKeyBar(true);
     }
@@ -473,8 +473,8 @@
   function saveKey(){
     const val = document.getElementById("apiKeyInput").value.trim();
     if(!val) return;
-    OPENAI_KEY = val;
-    localStorage.setItem("nexa_openai_key", val);
+    XAI_KEY = val;
+    localStorage.setItem("nexa_xai_key", val);
     toggleKeyBar();
     addMessage("sys", "Key saved to this device's local storage. You're set.");
   }
@@ -499,8 +499,8 @@
   }
 
   async function sendMessage(text, imageDataUrl, mediaTagFor){
-    if(!OPENAI_KEY){
-      addMessage("sys", "Add your OpenAI API key first (top right).");
+    if(!XAI_KEY){
+      addMessage("sys", "Add your xAI API key first (top right).");
       toggleKeyBar(true);
       return;
     }
@@ -528,21 +528,21 @@
       "Only include that line when the user clearly wants an app opened. Never invent app names outside that list.";
 
     try{
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("https://api.x.ai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer " + OPENAI_KEY
+          "Authorization": "Bearer " + XAI_KEY
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "grok-4.3",
           messages: [{ role: "system", content: systemPrompt }, ...history],
           max_tokens: 300
         })
       });
       if(!res.ok){
         const body = await res.json().catch(()=>({}));
-        throw new Error((body.error && body.error.message) || ("OpenAI error " + res.status));
+        throw new Error((body.error && body.error.message) || ("xAI error " + res.status));
       }
       const data = await res.json();
       let reply = data.choices[0].message.content.trim();
@@ -561,7 +561,7 @@
       if(action) openApp(action);
 
     } catch(e){
-      thinking.textContent = "Couldn't reach OpenAI: " + e.message;
+      thinking.textContent = "Couldn't reach xAI: " + e.message;
     }
   }
 
