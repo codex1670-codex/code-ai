@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXA·Code-X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#05060f;
+    --panel:#0b0e1c;
+    --cyan:#3ef0ff;
+    --violet:#9d5bff;
+    --magenta:#ff3ec9;
+    --line:#1c2440;
+    --text:#dfe6ff;
+    --muted:#7784ad;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:radial-gradient(ellipse at 50% -10%, #10173a 0%, var(--void) 55%);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* ambient circuit grid */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:42px 42px;
+    opacity:.18;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'Orbitron',sans-serif;
+    font-size:11px;
+    letter-spacing:.35em;
+    color:var(--cyan);
+    text-transform:uppercase;
+    margin-bottom:10px;
+    opacity:.85;
+  }
+  .app{
+    width:min(420px, 92vw);
+    background:linear-gradient(180deg, rgba(157,91,255,.06), rgba(62,240,255,.03));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:34px 30px;
+    backdrop-filter: blur(6px);
+    box-shadow:0 0 0 1px rgba(157,91,255,.05), 0 30px 80px -30px rgba(62,240,255,.25);
+    position:relative;
+    z-index:1;
+  }
+  h1{
+    font-family:'Orbitron',sans-serif;
+    font-weight:900;
+    font-size:26px;
+    margin:0 0 4px;
+    letter-spacing:.04em;
+    background:linear-gradient(90deg,var(--cyan),var(--violet) 60%,var(--magenta));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  p.sub{color:var(--muted); font-size:15px; margin:0 0 26px; line-height:1.5;}
+  label{display:block; font-size:12px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin:16px 0 6px;}
+  input[type=text], input[type=password]{
+    width:100%; padding:12px 14px; border-radius:10px;
+    background:#080a16; border:1px solid var(--line); color:var(--text);
+    font-family:'Rajdhani',sans-serif; font-size:16px; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus{border-color:var(--cyan); box-shadow:0 0 0 3px rgba(62,240,255,.12);}
+  .btn{
+    margin-top:24px; width:100%; padding:13px 18px; border:none; border-radius:10px;
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; letter-spacing:.08em;
+    text-transform:uppercase; cursor:pointer;
+    background:linear-gradient(90deg,var(--cyan),var(--violet));
+    color:#04050a;
+    transition:transform .12s, box-shadow .12s, opacity .12s;
+  }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 10px 30px -10px rgba(157,91,255,.6);}
+  .btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.ghost{background:transparent; border:1px solid var(--line); color:var(--text);}
+  .error{color:var(--magenta); font-size:13px; margin-top:10px; min-height:16px;}
+  .hint{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .hint a{color:var(--cyan);}
+  .screen{display:none;}
+  .screen.active{display:block;}
+  .link-box{
+    margin-top:18px; padding:12px 14px; border:1px dashed var(--line); border-radius:10px;
+    font-size:13px; word-break:break-all; color:var(--cyan); background:#080a16;
+  }
+  .row{display:flex; gap:10px; margin-top:12px;}
+  .row .btn{margin-top:0;}
+
+  /* ===== NEXA screen ===== */
+  .nexa-wrap{
+    width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:40px 20px; position:relative;
+  }
+  .nexa-stage{
+    width:min(900px,94vw);
+    display:grid; grid-template-columns: 260px 1fr; gap:40px; align-items:center;
+  }
+  @media (max-width:680px){ .nexa-stage{grid-template-columns:1fr; text-align:center;} }
+
+  .hologram{
+    width:240px; height:340px; position:relative; margin:0 auto;
+    animation:float 4.5s ease-in-out infinite;
+  }
+  @keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
+
+  .hologram svg{ width:100%; height:100%; filter:drop-shadow(0 0 18px rgba(62,240,255,.35)); }
+
+  .scan{
+    position:absolute; inset:0; border-radius:50% 50% 40% 40%/60% 60% 40% 40%;
+    background:linear-gradient(180deg, transparent 0%, rgba(62,240,255,.08) 50%, transparent 100%);
+    background-size:100% 6px;
+    animation:scan 3s linear infinite;
+    mix-blend-mode:screen;
+    pointer-events:none;
+  }
+  @keyframes scan{ 0%{background-position:0 0;} 100%{background-position:0 240px;} }
+
+  .glow-ring{
+    position:absolute; bottom:-6px; left:50%; width:170px; height:34px; transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(157,91,255,.55), transparent 70%);
+    filter:blur(4px);
+    animation:pulseRing 2.6s ease-in-out infinite;
+  }
+  @keyframes pulseRing{ 0%,100%{opacity:.5; transform:translateX(-50%) scale(1);} 50%{opacity:.9; transform:translateX(-50%) scale(1.08);} }
+
+  .nexa-info h2{
+    font-family:'Orbitron',sans-serif; font-size:30px; margin:0 0 8px;
+    color:var(--text); letter-spacing:.03em;
+  }
+  .nexa-info h2 span{
+    background:linear-gradient(90deg,var(--cyan),var(--magenta));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .nexa-info p{color:var(--muted); font-size:16px; line-height:1.6; max-width:46ch;}
+  .status-chip{
+    display:inline-flex; align-items:center; gap:8px; font-family:'Orbitron',sans-serif;
+    font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--cyan);
+    border:1px solid var(--line); padding:6px 12px; border-radius:999px; margin-top:14px;
+  }
+  .status-chip::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); animation:blink 1.4s infinite;}
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  footer.tag{
+    position:fixed; bottom:14px; left:0; right:0; text-align:center;
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:.25em; color:var(--muted); opacity:.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH / GENERATOR FLOW ============ -->
+<div class="app" id="authApp">
+
+  <div class="screen active" id="screen-login">
+    <div class="eyebrow">Code-X · Secure Access</div>
+    <h1>NEXA Console</h1>
+    <p class="sub">Sign in to generate a shareable NEXA link.</p>
+    <label>Username</label>
+    <input type="text" id="loginUser" autocomplete="username" placeholder="username">
+    <label>Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••">
+    <button class="btn" onclick="tryLogin()">Enter</button>
+    <div class="error" id="loginError"></div>
+  </div>
+
+  <div class="screen" id="screen-name">
+    <div class="eyebrow">Step 1 of 2</div>
+    <h1>Who's calling?</h1>
+    <p class="sub">NEXA greets whoever opens the link by this name.</p>
+    <label>Your name</label>
+    <input type="text" id="nameInput" placeholder="e.g. Rocky">
+    <button class="btn" id="nameNext" onclick="goToken()" disabled>Continue</button>
+  </div>
+
+  <div class="screen" id="screen-token">
+    <div class="eyebrow">Step 2 of 2</div>
+    <h1>GitHub token</h1>
+    <p class="sub">Used once, in your browser only, to create a small public gist that stores your name. It is never written into the link and never sent anywhere except api.github.com.</p>
+    <label>Personal access token</label>
+    <input type="password" id="tokenInput" placeholder="ghp_...">
+    <div class="hint">
+      Create one with <strong>only</strong> the <code>gist</code> scope at
+      <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">github.com/settings/tokens</a>.
+      Nothing broader is needed — don't grant repo or admin access for this.
+    </div>
+    <button class="btn" id="genBtn" onclick="generateLink()" disabled>Generate NEXA Link</button>
+    <div class="error" id="genError"></div>
+  </div>
+
+  <div class="screen" id="screen-result">
+    <div class="eyebrow">Ready</div>
+    <h1>Link generated</h1>
+    <p class="sub">Open this on any phone or device to summon NEXA. Note: this only works once the file is hosted somewhere public (e.g. GitHub Pages) — a local file path won't be reachable from another device.</p>
+    <div class="link-box" id="linkBox"></div>
+    <div class="row">
+      <button class="btn" onclick="copyLink()">Copy link</button>
+      <button class="btn ghost" onclick="window.open(document.getElementById('linkBox').textContent,'_blank')">Open</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ NEXA REVEAL SCREEN ============ -->
+<div class="nexa-wrap screen" id="screen-nexa">
+  <div class="nexa-stage">
+    <div class="hologram">
+      <div class="scan"></div>
+      <svg viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#9d5bff" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#3ef0ff" stop-opacity="0.15"/>
+          </linearGradient>
+          <radialGradient id="faceGrad" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#e8f8ff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#3ef0ff" stop-opacity="0.25"/>
+          </radialGradient>
+        </defs>
+        <!-- flowing hair / data streams -->
+        <path d="M60 60 Q30 160 55 300 Q40 250 45 180 Q30 240 50 320" stroke="#9d5bff" stroke-width="2" fill="none" opacity="0.5"/>
+        <path d="M180 60 Q210 160 185 300 Q200 250 195 180 Q210 240 190 320" stroke="#3ef0ff" stroke-width="2" fill="none" opacity="0.5"/>
+        <!-- body silhouette -->
+        <path d="M120 90 C90 90 75 120 78 150 C60 170 60 260 80 320 L160 320 C180 260 180 170 162 150 C165 120 150 90 120 90 Z" fill="url(#bodyGrad)" stroke="#3ef0ff" stroke-width="1"/>
+        <!-- circuit lines on body -->
+        <path d="M95 180 h20 v15 h15 M145 200 h-15 v20 h-25" stroke="#ff3ec9" stroke-width="1.2" fill="none" opacity="0.6"/>
+        <!-- head -->
+        <ellipse cx="120" cy="60" rx="34" ry="38" fill="url(#faceGrad)" stroke="#9d5bff" stroke-width="1"/>
+        <!-- eyes -->
+        <ellipse cx="107" cy="58" rx="5" ry="6" fill="#3ef0ff">
+          <animate attributeName="opacity" values="1;0.4;1" dur="2.2s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="133" cy="58" rx="5" ry="6" fill="#9d5bff">
+          <animate attributeName="opacity" values="1;0.4;1" dur="2.2s" repeatCount="indefinite"/>
+        </ellipse>
+        <!-- mouth -->
+        <path d="M110 76 Q120 82 130 76" stroke="#e8f8ff" stroke-width="1.4" fill="none" opacity="0.8"/>
+      </svg>
+      <div class="glow-ring"></div>
+    </div>
+    <div class="nexa-info">
+      <div class="eyebrow">Online</div>
+      <h2>Hey <span id="greetName">there</span>, I'm <span>NEXA</span></h2>
+      <p>Holographic interface for Code-X. Standing by, running on borrowed light and someone else's imagination.</p>
+      <div class="status-chip">Link active</div>
+    </div>
+  </div>
+</div>
+
+<footer class="tag">CODE&#8209;X · BUILT BY ROCKY</footer>
+
+<script>
+  const CREDS = { user: "code-x", pass: "1234" };
+  let sessionName = "";
+
+  function show(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function tryLogin(){
+    const u = document.getElementById("loginUser").value.trim();
+    const p = document.getElementById("loginPass").value;
+    const err = document.getElementById("loginError");
+    if(u === CREDS.user && p === CREDS.pass){
+      err.textContent = "";
+      show("screen-name");
+    } else {
+      err.textContent = "Incorrect username or password.";
+    }
+  }
+
+  document.getElementById("nameInput").addEventListener("input", e => {
+    document.getElementById("nameNext").disabled = e.target.value.trim().length === 0;
+  });
+  document.getElementById("tokenInput").addEventListener("input", e => {
+    document.getElementById("genBtn").disabled = e.target.value.trim().length === 0;
+  });
+
+  function goToken(){
+    sessionName = document.getElementById("nameInput").value.trim();
+    show("screen-token");
+  }
+
+  async function generateLink(){
+    const token = document.getElementById("tokenInput").value.trim();
+    const err = document.getElementById("genError");
+    const btn = document.getElementById("genBtn");
+    err.textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Generating...";
+    try{
+      const res = await fetch("https://api.github.com/gists", {
+        method: "POST",
+        headers: {
+          "Authorization": "token " + token,
+          "Accept": "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+          description: "NEXA link payload (Code-X)",
+          public: true,
+          files: {
+            "nexa.json": { content: JSON.stringify({ name: sessionName, created: new Date().toISOString() }) }
+          }
+        })
+      });
+      if(!res.ok){
+        const body = await res.json().catch(()=>({}));
+        throw new Error(body.message || ("GitHub API error " + res.status));
+      }
+      const data = await res.json();
+      const gistId = data.id;
+      const url = new URL(window.location.href.split("?")[0]);
+      url.searchParams.set("nexa", gistId);
+      document.getElementById("linkBox").textContent = url.toString();
+      show("screen-result");
+    } catch(e){
+      err.textContent = e.message || "Something went wrong contacting GitHub.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Generate NEXA Link";
+    }
+  }
+
+  function copyLink(){
+    const text = document.getElementById("linkBox").textContent;
+    navigator.clipboard.writeText(text).then(()=>{
+      const box = document.getElementById("linkBox");
+      const old = box.textContent;
+      box.textContent = "Copied!";
+      setTimeout(()=> box.textContent = old, 900);
+    });
+  }
+
+  // ===== Entry point: check for ?nexa=<gistId> =====
+  async function boot(){
+    const params = new URLSearchParams(window.location.search);
+    const gistId = params.get("nexa");
+    if(gistId){
+      document.getElementById("authApp").style.display = "none";
+      try{
+        const res = await fetch("https://api.github.com/gists/" + encodeURIComponent(gistId));
+        const data = await res.json();
+        const fileContent = data.files && data.files["nexa.json"] ? data.files["nexa.json"].content : "{}";
+        const parsed = JSON.parse(fileContent);
+        document.getElementById("greetName").textContent = parsed.name || "there";
+      } catch(e){
+        document.getElementById("greetName").textContent = "there";
+      }
+      show("screen-nexa");
+    }
+  }
+  boot();
+</script>
+</body>
+</html>
