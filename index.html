@@ -1,184 +1,709 @@
 <!DOCTYPE html>
-<html lang="ta" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code-X AI • by rocky_1029</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <style>
-    body { background: #0A0A0A; color: white; font-family: 'Inter', system-ui; }
-    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-    .neon-cyan { text-shadow: 0 0 20px #22d3ee; }
-    .btn-3d {
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-      box-shadow: 0 10px 30px -10px #22d3ee;
-    }
-    .btn-3d:active {
-      transform: translateY(6px) scale(0.95);
-      box-shadow: 0 5px 15px -5px #22d3ee;
-    }
-    .card-3d {
-      transition: all 0.4s ease;
-    }
-    .card-3d:hover {
-      transform: rotateX(15deg) rotateY(15deg) translateZ(30px);
-      box-shadow: 0 30px 60px -15px rgba(34, 211, 238, 0.4);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Code-X AI — Level Up Your Life & Coding Skills with AI</title>
+<meta name="description" content="Code-X AI by rocky_1029 — your AI coach for code, career, mindset and life." />
+
+<!-- Fonts: Orbitron (display / logo), Sora (body), JetBrains Mono (terminal/eyebrow motif) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind (utility layer only — all bespoke visuals are custom CSS below) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- GSAP + ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --bg-soft:#0E1113;
+    --cyan:#22D3EE;
+    --purple:#A855F7;
+    --pink:#EC4899;
+    --text:#F2FBFC;
+    --muted:#8FA6AD;
+    --glass:rgba(255,255,255,0.04);
+    --glass-border:rgba(255,255,255,0.09);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Sora',sans-serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+  ::selection{background:var(--cyan);color:#000;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-track{background:#050505;}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--purple));border-radius:10px;}
+
+  h1,h2,h3,.font-display{font-family:'Orbitron',sans-serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- terminal eyebrow motif (signature) ---------- */
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+    opacity:.85;
+  }
+  .eyebrow::before{content:"$";color:var(--pink);}
+  .cursor-blink{
+    display:inline-block;width:8px;height:1em;background:var(--cyan);
+    margin-left:4px;animation:blink 1.1s steps(1) infinite;vertical-align:-2px;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- background layers ---------- */
+  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .grid-overlay{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(34,211,238,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,.05) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+  .noise{
+    position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  main, header, footer{position:relative;z-index:3;}
+
+  /* ---------- glass navbar ---------- */
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 5%;
+    background:rgba(10,10,10,0.35);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    transition:padding .3s ease, background .3s ease, box-shadow .3s ease;
+  }
+  #navbar.scrolled{
+    padding:8px 5%;
+    background:rgba(8,8,10,0.72);
+    box-shadow:0 8px 32px rgba(0,0,0,.5), 0 0 24px rgba(34,211,238,.06);
+  }
+  .logo-mark{font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:.02em;font-size:1.35rem;}
+  .logo-mark span{background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .nav-link{
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+    position:relative;padding:6px 2px;transition:color .25s ease;
+  }
+  .nav-link::after{
+    content:"";position:absolute;left:0;bottom:0;height:1px;width:0%;
+    background:linear-gradient(90deg,var(--cyan),var(--pink));transition:width .25s ease;
+  }
+  .nav-link:hover{color:var(--text);}
+  .nav-link:hover::after{width:100%;}
+
+  /* ---------- 3D button system ---------- */
+  .btn-3d{
+    position:relative;font-family:'JetBrains Mono',monospace;font-weight:600;
+    font-size:.9rem;letter-spacing:.03em;color:#04141a;
+    padding:16px 34px;border:none;cursor:pointer;border-radius:14px;
+    background:linear-gradient(180deg,#5EEBFB,var(--cyan) 60%,#0FA8C4);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 -6px 10px rgba(0,0,0,.25) inset,
+      0 14px 0 #0A6E82,
+      0 18px 28px rgba(34,211,238,.35);
+    transform:translateY(0);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-3d:hover{transform:translateY(-4px);box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 -6px 10px rgba(0,0,0,.25) inset,
+      0 18px 0 #0A6E82,
+      0 26px 34px rgba(34,211,238,.45);}
+  .btn-3d:active{transform:translateY(10px);box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 -3px 6px rgba(0,0,0,.25) inset,
+      0 2px 0 #0A6E82,
+      0 4px 10px rgba(34,211,238,.3);}
+
+  .btn-3d-ghost{
+    position:relative;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem;
+    padding:15px 30px;border-radius:14px;color:var(--text);cursor:pointer;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 12px 0 rgba(255,255,255,.03), 0 16px 24px rgba(0,0,0,.5);
+    transform:translateY(0);transition:transform .12s ease, box-shadow .12s ease, border-color .2s ease;
+  }
+  .btn-3d-ghost:hover{transform:translateY(-4px);border-color:var(--purple);box-shadow:0 16px 0 rgba(255,255,255,.03), 0 26px 30px rgba(168,85,247,.25);}
+  .btn-3d-ghost:active{transform:translateY(8px);box-shadow:0 2px 0 rgba(255,255,255,.03), 0 4px 8px rgba(0,0,0,.4);}
+
+  /* ---------- glass panels / cards ---------- */
+  .glass-card{
+    background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+    border:1px solid var(--glass-border);
+    border-radius:20px;
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    box-shadow:0 20px 40px rgba(0,0,0,.45);
+    transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .35s ease;
+  }
+  .tilt-card{transform-style:preserve-3d;perspective:900px;}
+
+  .glow-cyan{box-shadow:0 0 0 1px rgba(34,211,238,.25), 0 0 40px rgba(34,211,238,.15);}
+  .glow-purple{box-shadow:0 0 0 1px rgba(168,85,247,.25), 0 0 40px rgba(168,85,247,.15);}
+  .glow-pink{box-shadow:0 0 0 1px rgba(236,72,153,.25), 0 0 40px rgba(236,72,153,.15);}
+
+  .text-gradient{background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  section{padding:120px 6% ;position:relative;}
+  @media (max-width:768px){section{padding:80px 6%;}}
+
+  /* section divider - terminal rule */
+  .term-rule{height:1px;width:100%;background:linear-gradient(90deg,transparent,rgba(34,211,238,.35),transparent);}
+
+  /* flip card (testimonials) */
+  .flip-outer{perspective:1200px;}
+  .flip-inner{position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
+  .flip-outer:hover .flip-inner{transform:rotateY(180deg);}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+  .flip-back{transform:rotateY(180deg);}
+
+  /* modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(4,6,8,.75);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-backdrop.open{display:flex;}
+  .modal-box{width:100%;max-width:440px;}
+
+  input[type=text],input[type=password]{
+    width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;padding:13px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;
+    outline:none;transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.15);}
+  input::placeholder{color:#5c6b70;}
+
+  .step{display:none;}
+  .step.active{display:block;}
+
+  .chip{font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:var(--muted);}
+
+  .float-slow{animation:floaty 6s ease-in-out infinite;}
+  .float-slower{animation:floaty 9s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+
+  a{-webkit-tap-highlight-color:transparent;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+  }
+</style>
 </head>
-<body class="bg-black text-white overflow-x-hidden">
+<body>
 
-  <!-- Navbar -->
-  <nav id="navbar" class="glass fixed top-0 w-full z-50 py-4">
-    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-xl flex items-center justify-center text-xl font-bold rotate-12">X</div>
-        <h1 class="text-2xl font-bold tracking-tighter neon-cyan">CODE-X AI</h1>
-      </div>
-      <div class="hidden md:flex gap-8 text-sm">
-        <a href="#" onclick="navigate('home')" class="hover:text-cyan-400 transition">Home</a>
-        <a href="#" onclick="navigate('about')" class="hover:text-cyan-400 transition">About</a>
-        <a href="#" onclick="navigate('coaching')" class="hover:text-cyan-400 transition">Coaching</a>
-        <a href="#" onclick="navigate('pricing')" class="hover:text-cyan-400 transition">Pricing</a>
-      </div>
-      <button onclick="showLogin()" class="btn-3d bg-gradient-to-r from-cyan-500 to-purple-600 px-8 py-3 rounded-2xl font-semibold text-sm tracking-wider">LOGIN</button>
-    </div>
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+<div class="noise"></div>
+
+<!-- ============ NAVBAR ============ -->
+<header id="navbar">
+  <a href="#home" class="logo-mark">CODE-<span>X</span> AI</a>
+  <nav class="hidden md:flex items-center gap-8">
+    <a class="nav-link" href="#about">about</a>
+    <a class="nav-link" href="#how">how_it_works</a>
+    <a class="nav-link" href="#modes">coaching_modes</a>
+    <a class="nav-link" href="#pricing">pricing</a>
+    <a class="nav-link" href="#contact">contact</a>
   </nav>
+  <button class="btn-3d-ghost !py-2.5 !px-5 text-xs" onclick="openLogin()">launch_coach →</button>
+</header>
 
-  <!-- HOME SECTION -->
-  <section id="home" class="min-h-screen flex items-center relative">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,#22d3ee10_0%,transparent_70%)]"></div>
-    <div class="max-w-7xl mx-auto px-6 pt-24 grid md:grid-cols-2 gap-12 items-center">
-      <div class="space-y-8">
-        <h1 class="text-6xl md:text-7xl font-bold leading-tight neon-cyan">
-          LEVEL UP YOUR<br>LIFE &amp; CODE
-        </h1>
-        <p class="text-xl text-gray-300 max-w-lg">
-          Your personal AI coach powered by advanced intelligence.<br>
-          <span class="text-cyan-400">Built by rocky_1029</span>
-        </p>
-        <button onclick="showLogin()" class="btn-3d text-xl px-12 py-6 rounded-3xl bg-gradient-to-r from-cyan-400 to-purple-500 font-bold tracking-widest hover:scale-105">
-          START COACHING NOW →
-        </button>
+<main id="home">
+
+  <!-- ============ HERO ============ -->
+  <section class="min-h-screen flex flex-col justify-center items-center text-center pt-32">
+    <div class="eyebrow mb-6">system.boot("code-x")<span class="cursor-blink"></span></div>
+    <h1 class="font-display text-[13vw] md:text-[6.5rem] leading-[0.95] font-900 mb-6">
+      LEVEL UP<br/><span class="text-gradient">YOUR LIFE & CODE</span>
+    </h1>
+    <p class="font-mono text-sm md:text-base text-[--muted] max-w-xl mb-10" style="color:var(--muted)">
+      Code-X AI is a full-stack AI coach — code mentor, career strategist, and mindset guide —
+      built by <span style="color:var(--cyan)">rocky_1029</span>.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-5">
+      <button class="btn-3d" onclick="openLogin()">talk to your ai coach now</button>
+      <a href="#how" class="btn-3d-ghost flex items-center">see how it works</a>
+    </div>
+
+    <!-- floating stat chips -->
+    <div class="flex flex-wrap gap-3 justify-center mt-14">
+      <span class="chip float-slow">⚡ instant code reviews</span>
+      <span class="chip float-slower">🧠 daily mindset resets</span>
+      <span class="chip float-slow">🚀 career roadmap ai</span>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section id="features">
+    <div class="text-center mb-16">
+      <div class="eyebrow justify-center flex mb-4">features.load()</div>
+      <h2 class="font-display text-4xl md:text-5xl font-700">Everything your growth stack needs</h2>
+    </div>
+    <div id="feature-grid" class="grid md:grid-cols-3 gap-7 max-w-6xl mx-auto">
+      <!-- cards injected via JS template below for consistency -->
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" class="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+    <div>
+      <div class="eyebrow mb-4">about.md</div>
+      <h2 class="font-display text-4xl font-700 mb-6">One coach. Every part of your growth.</h2>
+      <p class="text-[--muted] leading-relaxed mb-4" style="color:var(--muted)">
+        Code-X AI merges a senior engineering mentor, a career strategist, and a mindset coach
+        into a single conversational interface. It reviews your code, plans your learning path,
+        and checks in on how you're actually doing — not just what you're shipping.
+      </p>
+      <p class="text-[--muted] leading-relaxed" style="color:var(--muted)">
+        Built solo by <span style="color:var(--pink)">rocky_1029</span>, Code-X AI runs on your
+        own GitHub context so every suggestion is grounded in the code you actually write.
+      </p>
+    </div>
+    <div class="glass-card glow-purple p-8">
+      <div class="font-mono text-xs" style="color:var(--muted)">// mission.json</div>
+      <pre class="font-mono text-sm mt-3 leading-7" style="color:var(--cyan)">{
+  "goal": "compound growth",
+  "domains": ["code","career","mindset"],
+  "powered_by": "advanced ai",
+  "built_by": "rocky_1029"
+}</pre>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section id="how">
+    <div class="text-center mb-16">
+      <div class="eyebrow justify-center flex mb-4">how_it_works.run()</div>
+      <h2 class="font-display text-4xl md:text-5xl font-700">Three steps to your next level</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div class="glass-card p-8">
+        <div class="font-mono text-xs mb-4" style="color:var(--pink)">step_01</div>
+        <h3 class="font-display text-xl mb-3">Connect</h3>
+        <p style="color:var(--muted)" class="text-sm leading-relaxed">Sign in and link your GitHub token so Code-X can see the projects you're actually working on.</p>
       </div>
-
-      <!-- 3D Logo Area -->
-      <div class="relative h-96 flex items-center justify-center">
-        <div class="w-80 h-80 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse shadow-2xl shadow-cyan-500/50">
-          <div class="text-9xl font-black text-black rotate-12">X</div>
-        </div>
-        <div class="absolute text-cyan-400 text-2xl font-mono animate-bounce">AI ORB</div>
+      <div class="glass-card p-8">
+        <div class="font-mono text-xs mb-4" style="color:var(--purple)">step_02</div>
+        <h3 class="font-display text-xl mb-3">Tell it your goal</h3>
+        <p style="color:var(--muted)" class="text-sm leading-relaxed">Tell your coach what you're leveling up — a skill, a career move, a habit, a mindset.</p>
+      </div>
+      <div class="glass-card p-8">
+        <div class="font-mono text-xs mb-4" style="color:var(--cyan)">step_03</div>
+        <h3 class="font-display text-xl mb-3">Get a plan you can share</h3>
+        <p style="color:var(--muted)" class="text-sm leading-relaxed">Generate a shareable coaching session link and track your progress over time.</p>
       </div>
     </div>
   </section>
 
-  <!-- LOGIN MODAL -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-    <div class="glass w-full max-w-md p-10 rounded-3xl">
-      <h2 class="text-3xl font-bold text-center mb-8 neon-cyan">CODE-X AI LOGIN</h2>
-      
-      <input id="username" type="text" placeholder="Username" class="w-full mb-4 bg-black border border-cyan-500/30 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-400">
-      <input id="password" type="password" placeholder="Password" class="w-full mb-8 bg-black border border-cyan-500/30 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-400">
-      
-      <button onclick="handleLogin()" class="btn-3d w-full py-5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl font-bold text-lg">LOGIN SECURELY</button>
-      
-      <p class="text-center text-xs text-gray-500 mt-6">Demo: username = <span class="text-cyan-400">code-x</span><br>password = <span class="text-cyan-400">1234</span></p>
+  <!-- ============ COACHING MODES ============ -->
+  <section id="modes">
+    <div class="text-center mb-16">
+      <div class="eyebrow justify-center flex mb-4">select_mode --list</div>
+      <h2 class="font-display text-4xl md:text-5xl font-700">Four coaches. One brain.</h2>
     </div>
-  </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto" id="modes-grid"></div>
+  </section>
 
-  <!-- DASHBOARD (After Login) -->
-  <div id="dashboard" class="hidden min-h-screen pt-24 bg-black">
-    <div class="max-w-5xl mx-auto px-6">
-      <h2 class="text-4xl font-bold text-cyan-400 mb-10">Welcome back, Coach <span id="userNameDisplay"></span></h2>
+  <!-- ============ AI CHAT DEMO / LOGIN GATE SECTION ============ -->
+  <section id="demo" class="text-center">
+    <div class="eyebrow justify-center flex mb-4">ai_chat --demo</div>
+    <h2 class="font-display text-4xl md:text-5xl font-700 mb-6">Your coach is one login away</h2>
+    <p class="max-w-xl mx-auto mb-10 text-sm" style="color:var(--muted)">
+      Sign in, tell Code-X your name and your goal, link a GitHub token, then generate
+      a shareable session link you can send anywhere.
+    </p>
+    <button class="btn-3d" onclick="openLogin()">open ai chat</button>
+  </section>
 
-      <div class="grid md:grid-cols-2 gap-8">
-        <!-- Profile Setup -->
-        <div class="glass p-8 rounded-3xl card-3d">
-          <h3 class="text-2xl mb-6">Complete Your Profile</h3>
-          <input id="fullName" type="text" placeholder="Your Full Name" class="w-full mb-4 bg-black/50 border border-gray-700 rounded-2xl px-6 py-4">
-          <input id="aiFocus" type="text" placeholder="What do you want to improve? (Coding / Life / Career)" class="w-full mb-6 bg-black/50 border border-gray-700 rounded-2xl px-6 py-4">
-          <input id="githubToken" type="text" placeholder="GitHub Personal Access Token (optional)" class="w-full mb-6 bg-black/50 border border-gray-700 rounded-2xl px-6 py-4">
-          
-          <button onclick="generateLink()" class="btn-3d w-full py-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl font-bold text-xl">GENERATE SHAREABLE LINK</button>
-        </div>
+  <!-- ============ TESTIMONIALS ============ -->
+  <section id="testimonials">
+    <div class="text-center mb-16">
+      <div class="eyebrow justify-center flex mb-4">testimonials.fetch()</div>
+      <h2 class="font-display text-4xl md:text-5xl font-700">Builders leveling up</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" id="testi-grid"></div>
+  </section>
 
-        <!-- AI Chat -->
-        <div class="glass p-8 rounded-3xl card-3d">
-          <h3 class="text-2xl mb-6 flex items-center gap-3"><i class="fas fa-robot"></i> Talk to Code-X AI</h3>
-          <div id="chatBox" class="h-80 overflow-y-auto mb-4 bg-black/40 rounded-2xl p-4 space-y-4 text-sm"></div>
-          <div class="flex gap-3">
-            <input id="chatInput" type="text" placeholder="Ask anything..." class="flex-1 bg-black border border-cyan-500/30 rounded-2xl px-6 py-4">
-            <button onclick="sendMessage()" class="btn-3d px-8 bg-cyan-500 rounded-2xl">SEND</button>
-          </div>
-        </div>
+  <!-- ============ PRICING ============ -->
+  <section id="pricing">
+    <div class="text-center mb-16">
+      <div class="eyebrow justify-center flex mb-4">pricing.select()</div>
+      <h2 class="font-display text-4xl md:text-5xl font-700">Pick your track</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" id="pricing-grid"></div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" class="max-w-2xl mx-auto text-center">
+    <div class="eyebrow justify-center flex mb-4">contact.send()</div>
+    <h2 class="font-display text-4xl font-700 mb-6">Get in touch</h2>
+    <p class="mb-10 text-sm" style="color:var(--muted)">Questions, partnerships, feedback — reach the creator directly.</p>
+    <form class="glass-card p-8 text-left space-y-4" onsubmit="event.preventDefault(); this.querySelector('.done-msg').style.display='block';">
+      <input type="text" placeholder="your name" required>
+      <input type="text" placeholder="your email" required>
+      <textarea placeholder="message" rows="4" required style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none;"></textarea>
+      <button class="btn-3d w-full" type="submit">send message</button>
+      <p class="done-msg font-mono text-xs" style="display:none;color:var(--cyan)">// message queued — rocky_1029 will reply soon</p>
+    </form>
+  </section>
+
+</main>
+
+<footer class="text-center py-10 font-mono text-xs" style="color:var(--muted)">
+  <div class="term-rule mb-8"></div>
+  © 2026 CODE-X AI — built by rocky_1029. All systems nominal.
+</footer>
+
+<!-- ============ LOGIN / TOKEN / GENERATE MODAL ============ -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal-box glass-card glow-cyan p-8" id="modalContent">
+
+    <!-- STEP 1: login -->
+    <div class="step active" id="step-login">
+      <div class="eyebrow mb-4">auth.login()</div>
+      <h3 class="font-display text-2xl mb-6">Access Code-X AI</h3>
+      <div class="space-y-4">
+        <input type="text" id="loginUser" placeholder="username" autocomplete="off">
+        <input type="password" id="loginPass" placeholder="password">
+        <p id="loginError" class="font-mono text-xs" style="color:var(--pink);display:none;">// access denied — check credentials</p>
+        <button class="btn-3d w-full" onclick="tryLogin()">sign in</button>
+      </div>
+      <p class="font-mono text-[11px] mt-5" style="color:var(--muted)">demo credentials → username: <span style="color:var(--cyan)">code-x</span> · password: <span style="color:var(--cyan)">1234</span></p>
+    </div>
+
+    <!-- STEP 2: profile -->
+    <div class="step" id="step-profile">
+      <div class="eyebrow mb-4">session.init()</div>
+      <h3 class="font-display text-2xl mb-6">Set up your coach</h3>
+      <div class="space-y-4">
+        <input type="text" id="userName" placeholder="your name">
+        <input type="text" id="userGoal" placeholder="what are you leveling up? (code / career / mindset / life)">
+        <input type="password" id="ghToken" placeholder="github personal access token">
+        <p class="font-mono text-[11px] leading-relaxed" style="color:var(--muted)">
+          // your token stays in this browser tab and is sent only to api.github.com to
+          create a gist. it is never stored or sent anywhere else.
+        </p>
+        <p id="profileError" class="font-mono text-xs" style="color:var(--pink);display:none;"></p>
+        <button class="btn-3d w-full" id="generateBtn" onclick="generateLink()">generate shareable link</button>
       </div>
     </div>
+
+    <!-- STEP 3: result -->
+    <div class="step" id="step-result">
+      <div class="eyebrow mb-4">link.ready()</div>
+      <h3 class="font-display text-2xl mb-6">Your session is live</h3>
+      <p class="font-mono text-xs mb-4" style="color:var(--muted)">share this link — it points to a gist, never to your token:</p>
+      <div class="flex gap-2 mb-6">
+        <input type="text" id="resultLink" readonly style="flex:1;">
+        <button class="btn-3d-ghost !py-3 !px-4 text-xs" onclick="copyLink()">copy</button>
+      </div>
+      <a id="openLinkBtn" class="btn-3d w-full block text-center" href="#" target="_blank" rel="noopener">open session ↗</a>
+    </div>
+
+    <button class="font-mono text-xs mt-6 block mx-auto" style="color:var(--muted)" onclick="closeLogin()">close ✕</button>
   </div>
+</div>
 
-  <script>
-    let isLoggedIn = false;
+<script>
+/* =========================================================
+   CONTENT — feature / modes / testimonials / pricing data
+   ========================================================= */
+const features = [
+  {t:"AI Code Mentor", d:"Real-time reviews, refactors and explanations grounded in your own repos.", g:"glow-cyan", c:"01"},
+  {t:"Personalized Learning Path", d:"A roadmap that reshapes itself around what you actually struggle with.", g:"glow-purple", c:"02"},
+  {t:"Daily Coaching", d:"Short, sharp check-ins that keep momentum without the burnout.", g:"glow-pink", c:"03"},
+  {t:"Progress Tracker", d:"See skill growth, streaks and wins mapped over time.", g:"glow-cyan", c:"04"},
+  {t:"Voice Mode", d:"Talk through a hard problem out loud, hands-free.", g:"glow-purple", c:"05"},
+  {t:"Shareable Sessions", d:"Turn any coaching session into a link you can send or revisit.", g:"glow-pink", c:"06"},
+];
+const grid = document.getElementById('feature-grid');
+features.forEach(f=>{
+  grid.insertAdjacentHTML('beforeend', `
+    <div class="glass-card ${f.g} p-8 tilt-card feature-card">
+      <div class="font-mono text-xs mb-6" style="color:var(--muted)">${f.c}</div>
+      <h3 class="font-display text-lg mb-3">${f.t}</h3>
+      <p class="text-sm leading-relaxed" style="color:var(--muted)">${f.d}</p>
+    </div>`);
+});
 
-    function navigate(section) {
-      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-      document.getElementById(section).classList.remove('hidden');
+const modes = [
+  {t:"Life Coaching", d:"Habits, energy, focus — the operating system behind everything else.", e:"🌱"},
+  {t:"Coding Mentor", d:"Senior-level review and pairing on real code, any stack.", e:"💻"},
+  {t:"Career Coach", d:"Roadmaps, resumes, and interview prep tuned to your target role.", e:"📈"},
+  {t:"Mindset AI", d:"Reframe setbacks, manage pressure, build real confidence.", e:"🧠"},
+];
+const modesGrid = document.getElementById('modes-grid');
+modes.forEach(m=>{
+  modesGrid.insertAdjacentHTML('beforeend', `
+    <div class="glass-card p-7 tilt-card feature-card text-center">
+      <div class="text-4xl mb-4">${m.e}</div>
+      <h3 class="font-display text-base mb-2">${m.t}</h3>
+      <p class="text-xs leading-relaxed" style="color:var(--muted)">${m.d}</p>
+    </div>`);
+});
+
+const testis = [
+  {n:"Maya R.", r:"Frontend Engineer", q:"Code-X caught a race condition my whole team missed. It felt like a senior dev on call 24/7."},
+  {n:"Devon K.", r:"CS Student", q:"The daily coaching check-ins are the only reason I stayed consistent this semester."},
+  {n:"Priya S.", r:"Career Switcher", q:"Went from tutorials to a real offer in ten weeks with the career track."},
+];
+const testiGrid = document.getElementById('testi-grid');
+testis.forEach(t=>{
+  testiGrid.insertAdjacentHTML('beforeend', `
+    <div class="flip-outer h-56">
+      <div class="flip-inner h-full">
+        <div class="flip-face glass-card p-7 flex flex-col justify-center items-center text-center">
+          <div class="text-3xl mb-3">★★★★★</div>
+          <h4 class="font-display text-sm">${t.n}</h4>
+          <p class="font-mono text-[11px]" style="color:var(--muted)">${t.r}</p>
+        </div>
+        <div class="flip-face flip-back glass-card glow-purple p-7 flex items-center">
+          <p class="text-sm leading-relaxed italic">"${t.q}"</p>
+        </div>
+      </div>
+    </div>`);
+});
+
+const plans = [
+  {n:"Starter", p:"$0", d:"Get a feel for your AI coach.", f:["Daily check-in","Community access","1 coaching mode"], g:"glow-cyan"},
+  {n:"Pro", p:"$19/mo", d:"For builders who want compounding growth.", f:["All 4 coaching modes","GitHub-aware reviews","Shareable sessions","Progress tracker"], g:"glow-purple", pop:true},
+  {n:"Elite", p:"$49/mo", d:"Full access, priority everything.", f:["Everything in Pro","Voice mode","1:1 escalation to rocky_1029","Early features"], g:"glow-pink"},
+];
+const pricingGrid = document.getElementById('pricing-grid');
+plans.forEach(p=>{
+  pricingGrid.insertAdjacentHTML('beforeend', `
+    <div class="glass-card ${p.g} p-8 tilt-card feature-card relative ${p.pop?'md:-translate-y-4':''}">
+      ${p.pop?'<div class="chip absolute -top-3 left-1/2 -translate-x-1/2" style="border-color:var(--purple);color:var(--purple)">most popular</div>':''}
+      <h3 class="font-display text-xl mb-1">${p.n}</h3>
+      <div class="font-display text-3xl mb-4 text-gradient">${p.p}</div>
+      <p class="text-xs mb-6" style="color:var(--muted)">${p.d}</p>
+      <ul class="space-y-2 mb-8 text-sm">
+        ${p.f.map(x=>`<li style="color:var(--muted)">— ${x}</li>`).join('')}
+      </ul>
+      <button class="btn-3d-ghost w-full" onclick="openLogin()">choose ${p.n.toLowerCase()}</button>
+    </div>`);
+});
+
+/* =========================================================
+   NAVBAR scroll state
+   ========================================================= */
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 40));
+
+/* =========================================================
+   3D tilt on hover for cards
+   ========================================================= */
+document.querySelectorAll('.tilt-card').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5;
+    const y = (e.clientY - r.top)/r.height - .5;
+    card.style.transform = `rotateY(${x*14}deg) rotateX(${-y*14}deg) translateY(-6px)`;
+  });
+  card.addEventListener('mouseleave', ()=> card.style.transform = 'rotateY(0) rotateX(0) translateY(0)');
+});
+
+/* =========================================================
+   GSAP scroll-triggered reveals
+   ========================================================= */
+gsap.registerPlugin(ScrollTrigger);
+gsap.utils.toArray('section').forEach(sec=>{
+  gsap.from(sec.querySelectorAll('h2, .glass-card, form'), {
+    opacity:0, y:40, duration:.9, ease:'power3.out', stagger:.08,
+    scrollTrigger:{trigger:sec, start:'top 78%'}
+  });
+});
+
+/* =========================================================
+   THREE.JS — rotating wireframe "X" + particle field
+   ========================================================= */
+(function initScene(){
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, .1, 100);
+  camera.position.z = 9;
+
+  // glowing "X" made of two crossed extruded boxes (wireframe + solid core)
+  const xGroup = new THREE.Group();
+  const barGeo = new THREE.BoxGeometry(0.5, 6.2, 0.5);
+  const matCyan = new THREE.MeshBasicMaterial({color:0x22D3EE, wireframe:true});
+  const matPurple = new THREE.MeshBasicMaterial({color:0xA855F7, wireframe:true});
+
+  const bar1 = new THREE.Mesh(barGeo, matCyan); bar1.rotation.z = Math.PI/4;
+  const bar2 = new THREE.Mesh(barGeo, matPurple); bar2.rotation.z = -Math.PI/4;
+  xGroup.add(bar1, bar2);
+  scene.add(xGroup);
+
+  // AI orb
+  const orbGeo = new THREE.IcosahedronGeometry(1.15, 1);
+  const orbMat = new THREE.MeshBasicMaterial({color:0xEC4899, wireframe:true, transparent:true, opacity:.55});
+  const orb = new THREE.Mesh(orbGeo, orbMat);
+  orb.position.set(3.4, -1.6, -2);
+  scene.add(orb);
+
+  // particle field
+  const particleCount = window.innerWidth < 768 ? 350 : 900;
+  const pGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount*3);
+  for(let i=0;i<particleCount;i++){
+    positions[i*3] = (Math.random()-0.5)*30;
+    positions[i*3+1] = (Math.random()-0.5)*30;
+    positions[i*3+2] = (Math.random()-0.5)*30;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  const pMat = new THREE.PointsMaterial({color:0x22D3EE, size:.045, transparent:true, opacity:.6});
+  const particles = new THREE.Points(pGeo, pMat);
+  scene.add(particles);
+
+  let mouseX=0, mouseY=0;
+  window.addEventListener('mousemove', e=>{
+    mouseX = (e.clientX/window.innerWidth - .5);
+    mouseY = (e.clientY/window.innerHeight - .5);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);
+    xGroup.rotation.y += 0.006;
+    xGroup.rotation.x += 0.002;
+    orb.rotation.y -= 0.008;
+    orb.rotation.x += 0.003;
+    particles.rotation.y += 0.0007;
+    camera.position.x += (mouseX*1.2 - camera.position.x)*0.03;
+    camera.position.y += (-mouseY*1.2 - camera.position.y)*0.03;
+    camera.lookAt(0,0,0);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+/* =========================================================
+   LOGIN / PROFILE / GENERATE FLOW
+   =========================================================
+   - Step 1 checks a hardcoded demo login (client-side only demo gate).
+   - Step 2 collects name, goal and a GitHub token.
+   - Generate calls the GitHub REST API DIRECTLY from this page using
+     the token the user typed in. The token is only ever sent to
+     api.github.com and is never written to localStorage or any
+     third-party server. The resulting shareable link points at the
+     created Gist — the token itself is never embedded in the link.
+*/
+function openLogin(){
+  document.getElementById('loginModal').classList.add('open');
+  showStep('step-login');
+}
+function closeLogin(){
+  document.getElementById('loginModal').classList.remove('open');
+}
+function showStep(id){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function tryLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginError');
+  if(u === 'code-x' && p === '1234'){
+    err.style.display = 'none';
+    showStep('step-profile');
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+async function generateLink(){
+  const name = document.getElementById('userName').value.trim();
+  const goal = document.getElementById('userGoal').value.trim();
+  const token = document.getElementById('ghToken').value.trim();
+  const err = document.getElementById('profileError');
+  const btn = document.getElementById('generateBtn');
+  err.style.display = 'none';
+
+  if(!name || !goal || !token){
+    err.textContent = '// fill in name, goal and github token';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'generating…';
+  btn.disabled = true;
+
+  try{
+    const res = await fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github+json'
+      },
+      body: JSON.stringify({
+        description: `Code-X AI session for ${name}`,
+        public: false,
+        files: {
+          'code-x-session.json': {
+            content: JSON.stringify({
+              name,
+              goal,
+              created: new Date().toISOString(),
+              platform: 'Code-X AI by rocky_1029'
+            }, null, 2)
+          }
+        }
+      })
+    });
+
+    if(!res.ok){
+      throw new Error(res.status === 401 ? 'invalid or expired github token' : `github api error (${res.status})`);
     }
 
-    function showLogin() {
-      document.getElementById('loginModal').classList.remove('hidden');
-    }
+    const data = await res.json();
+    document.getElementById('resultLink').value = data.html_url;
+    document.getElementById('openLinkBtn').href = data.html_url;
+    showStep('step-result');
 
-    function handleLogin() {
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
+  }catch(e){
+    err.textContent = `// ${e.message}`;
+    err.style.display = 'block';
+  }finally{
+    btn.textContent = 'generate shareable link';
+    btn.disabled = false;
+  }
+}
 
-      if (user === "code-x" && pass === "1234") {
-        document.getElementById('loginModal').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('home').classList.add('hidden');
-        isLoggedIn = true;
-        alert("✅ Login Successful! Welcome to Code-X AI");
-      } else {
-        alert("worng");
-      }
-    }
-
-    function generateLink() {
-      const name = document.getElementById('fullName').value || "User";
-      const token = document.getElementById('githubToken').value;
-      
-      if (!token) {
-        alert("Please enter a GitHub token for shareable link generation");
-        return;
-      }
-
-      const shareLink = `https://codex-ai.rocks/share/${name.toLowerCase().replace(/\s+/g, '')}-${Date.now()}`;
-      alert(`🎉 Shareable Link Generated!\n\n${shareLink}\n\n(Using GitHub Token)`);
-    }
-
-    function sendMessage() {
-      const input = document.getElementById('chatInput');
-      const chatBox = document.getElementById('chatBox');
-      
-      if (input.value.trim() === "") return;
-
-      chatBox.innerHTML += `<div class="text-right"><span class="inline-block bg-cyan-600 px-5 py-3 rounded-3xl">${input.value}</span></div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      setTimeout(() => {
-        chatBox.innerHTML += `<div class="text-left"><span class="inline-block bg-purple-600/80 px-5 py-3 rounded-3xl">Understood. I'm Code-X AI. How can I help you level up today?</span></div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 800);
-
-      input.value = "";
-    }
-
-    // Tailwind Script
-    tailwind.config = {
-      content: [],
-      theme: { extend: {} }
-    };
-  </script>
+function copyLink(){
+  const input = document.getElementById('resultLink');
+  input.select();
+  navigator.clipboard.writeText(input.value);
+}
+</script>
 </body>
 </html>
