@@ -1,603 +1,747 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Code-X AI — Level Up Your Life & Coding Skills with AI</title>
-<meta name="description" content="Code-X AI by rocky_1029 — your AI coach for code, career, mindset and life." />
-
-<!-- Fonts: Orbitron (display / logo), Sora (body), JetBrains Mono (terminal/eyebrow motif) -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CODE-X — Digital Creative Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-<!-- Tailwind (utility layer only — all bespoke visuals are custom CSS below) -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- GSAP + ScrollTrigger -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-<!-- Three.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A0A0A;
-    --bg-soft:#0E1113;
-    --cyan:#22D3EE;
-    --purple:#A855F7;
-    --pink:#EC4899;
-    --text:#F2FBFC;
-    --muted:#8FA6AD;
-    --glass:rgba(255,255,255,0.04);
+    --black:#030308;
+    --void:#000000;
+    --panel:#0a0d18;
+    --panel-2:#0f1322;
+    --cyan:#00f6ff;
+    --cyan-soft:#5df3ff;
+    --violet:#a742ff;
+    --violet-soft:#c98bff;
+    --gold:#ffcf5c;
+    --gold-soft:#ffe3a0;
+    --text:#e9edf7;
+    --muted:#8992ac;
+    --glass:rgba(255,255,255,0.035);
     --glass-border:rgba(255,255,255,0.09);
+    --line:rgba(255,255,255,0.07);
   }
-  *{box-sizing:border-box;}
+  *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
-    background:var(--bg);
+    background:var(--black);
     color:var(--text);
-    font-family:'Sora',sans-serif;
+    font-family:'Space Grotesk', sans-serif;
     overflow-x:hidden;
-    position:relative;
+    cursor:default;
   }
-  ::selection{background:var(--cyan);color:#000;}
+  ::selection{background:var(--violet);color:#fff;}
   ::-webkit-scrollbar{width:8px;}
-  ::-webkit-scrollbar-track{background:#050505;}
-  ::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--purple));border-radius:10px;}
+  ::-webkit-scrollbar-track{background:var(--black);}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--violet));border-radius:4px;}
 
-  h1,h2,h3,.font-display{font-family:'Orbitron',sans-serif;}
-  .font-mono{font-family:'JetBrains Mono',monospace;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Orbitron', sans-serif;}
 
-  /* ---------- terminal eyebrow motif (signature) ---------- */
-  .eyebrow{
-    font-family:'JetBrains Mono',monospace;
-    font-size:0.72rem;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--cyan);
-    display:inline-flex;
-    align-items:center;
-    gap:.5rem;
-    opacity:.85;
+  /* ===== BACKGROUND CANVAS ===== */
+  #bg-canvas{
+    position:fixed; inset:0; z-index:0;
+    width:100%; height:100%;
+    background:radial-gradient(ellipse at 50% 20%, #0a0f22 0%, #030308 55%, #000 100%);
   }
-  .eyebrow::before{content:"$";color:var(--pink);}
-  .cursor-blink{
-    display:inline-block;width:8px;height:1em;background:var(--cyan);
-    margin-left:4px;animation:blink 1.1s steps(1) infinite;vertical-align:-2px;
-  }
-  @keyframes blink{50%{opacity:0;}}
-
-  /* ---------- background layers ---------- */
-  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
-  .grid-overlay{
-    position:fixed;inset:0;z-index:1;pointer-events:none;
-    background-image:
-      linear-gradient(rgba(34,211,238,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(34,211,238,.05) 1px, transparent 1px);
-    background-size:48px 48px;
-    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
-  }
-  .noise{
-    position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:0.035; mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  main, header, footer{position:relative;z-index:3;}
+  .vignette{
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    background:radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,0.55) 100%);
+  }
 
-  /* ---------- glass navbar ---------- */
-  #navbar{
-    position:fixed;top:0;left:0;right:0;z-index:50;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 5%;
-    background:rgba(10,10,10,0.35);
-    backdrop-filter:blur(18px) saturate(140%);
-    -webkit-backdrop-filter:blur(18px) saturate(140%);
-    border-bottom:1px solid rgba(255,255,255,0.06);
-    transition:padding .3s ease, background .3s ease, box-shadow .3s ease;
-  }
-  #navbar.scrolled{
-    padding:8px 5%;
-    background:rgba(8,8,10,0.72);
-    box-shadow:0 8px 32px rgba(0,0,0,.5), 0 0 24px rgba(34,211,238,.06);
-  }
-  .logo-mark{font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:.02em;font-size:1.35rem;}
-  .logo-mark span{background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .nav-link{
-    font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
-    position:relative;padding:6px 2px;transition:color .25s ease;
-  }
-  .nav-link::after{
-    content:"";position:absolute;left:0;bottom:0;height:1px;width:0%;
-    background:linear-gradient(90deg,var(--cyan),var(--pink));transition:width .25s ease;
-  }
-  .nav-link:hover{color:var(--text);}
-  .nav-link:hover::after{width:100%;}
+  main{position:relative; z-index:3;}
 
-  /* ---------- 3D button system ---------- */
-  .btn-3d{
-    position:relative;font-family:'JetBrains Mono',monospace;font-weight:600;
-    font-size:.9rem;letter-spacing:.03em;color:#04141a;
-    padding:16px 34px;border:none;cursor:pointer;border-radius:14px;
-    background:linear-gradient(180deg,#5EEBFB,var(--cyan) 60%,#0FA8C4);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.6) inset,
-      0 -6px 10px rgba(0,0,0,.25) inset,
-      0 14px 0 #0A6E82,
-      0 18px 28px rgba(34,211,238,.35);
-    transform:translateY(0);
-    transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .btn-3d:hover{transform:translateY(-4px);box-shadow:
-      0 1px 0 rgba(255,255,255,.6) inset,
-      0 -6px 10px rgba(0,0,0,.25) inset,
-      0 18px 0 #0A6E82,
-      0 26px 34px rgba(34,211,238,.45);}
-  .btn-3d:active{transform:translateY(10px);box-shadow:
-      0 1px 0 rgba(255,255,255,.6) inset,
-      0 -3px 6px rgba(0,0,0,.25) inset,
-      0 2px 0 #0A6E82,
-      0 4px 10px rgba(34,211,238,.3);}
-
-  .btn-3d-ghost{
-    position:relative;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem;
-    padding:15px 30px;border-radius:14px;color:var(--text);cursor:pointer;
-    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01));
-    border:1px solid rgba(255,255,255,.14);
-    box-shadow:0 12px 0 rgba(255,255,255,.03), 0 16px 24px rgba(0,0,0,.5);
-    transform:translateY(0);transition:transform .12s ease, box-shadow .12s ease, border-color .2s ease;
-  }
-  .btn-3d-ghost:hover{transform:translateY(-4px);border-color:var(--purple);box-shadow:0 16px 0 rgba(255,255,255,.03), 0 26px 30px rgba(168,85,247,.25);}
-  .btn-3d-ghost:active{transform:translateY(8px);box-shadow:0 2px 0 rgba(255,255,255,.03), 0 4px 8px rgba(0,0,0,.4);}
-
-  /* ---------- glass panels / cards ---------- */
-  .glass-card{
-    background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
-    border:1px solid var(--glass-border);
-    border-radius:20px;
+  /* ===== NAV ===== */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 5vw;
     backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    box-shadow:0 20px 40px rgba(0,0,0,.45);
-    transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .35s ease;
+    background:linear-gradient(to bottom, rgba(3,3,8,0.7), rgba(3,3,8,0));
+    border-bottom:1px solid transparent;
+    transition:border-color .4s ease, background .4s ease;
   }
-  .tilt-card{transform-style:preserve-3d;perspective:900px;}
-
-  .glow-cyan{box-shadow:0 0 0 1px rgba(34,211,238,.25), 0 0 40px rgba(34,211,238,.15);}
-  .glow-purple{box-shadow:0 0 0 1px rgba(168,85,247,.25), 0 0 40px rgba(168,85,247,.15);}
-  .glow-pink{box-shadow:0 0 0 1px rgba(236,72,153,.25), 0 0 40px rgba(236,72,153,.15);}
-
-  .text-gradient{background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
-
-  section{padding:120px 6% ;position:relative;}
-  @media (max-width:768px){section{padding:80px 6%;}}
-
-  /* section divider - terminal rule */
-  .term-rule{height:1px;width:100%;background:linear-gradient(90deg,transparent,rgba(34,211,238,.35),transparent);}
-
-  /* flip card (testimonials) */
-  .flip-outer{perspective:1200px;}
-  .flip-inner{position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
-  .flip-outer:hover .flip-inner{transform:rotateY(180deg);}
-  .flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
-  .flip-back{transform:rotateY(180deg);}
-
-  /* modal */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(4,6,8,.75);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
-  .modal-backdrop.open{display:flex;}
-  .modal-box{width:100%;max-width:440px;}
-
-  input[type=text],input[type=password]{
-    width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;padding:13px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;
-    outline:none;transition:border-color .2s ease, box-shadow .2s ease;
+  nav.scrolled{
+    background:rgba(3,3,8,0.75);
+    border-bottom:1px solid var(--line);
   }
-  input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.15);}
-  input::placeholder{color:#5c6b70;}
+  .logo{
+    font-family:'Orbitron', sans-serif; font-weight:900; font-size:1.3rem;
+    letter-spacing:0.12em;
+    background:linear-gradient(120deg, #fff 0%, var(--cyan-soft) 35%, #fff 55%, var(--violet-soft) 80%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:250% auto;
+    animation:sheen 6s linear infinite;
+    text-shadow:0 0 30px rgba(0,246,255,0.25);
+  }
+  @keyframes sheen{ to{ background-position:250% center; } }
+  .nav-links{ display:flex; gap:2.6rem; list-style:none; }
+  .nav-links a{
+    position:relative; text-decoration:none; color:var(--muted);
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.16em; text-transform:uppercase;
+    padding:6px 2px; transition:color .3s ease;
+  }
+  .nav-links a::before{
+    content:''; position:absolute; left:0; bottom:0; height:1px; width:0%;
+    background:linear-gradient(90deg, var(--cyan), var(--violet));
+    box-shadow:0 0 8px var(--cyan);
+    transition:width .35s ease;
+  }
+  .nav-links a:hover{ color:var(--text); text-shadow:0 0 12px rgba(0,246,255,0.6); }
+  .nav-links a:hover::before{ width:100%; }
+  .nav-cta{
+    font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.14em;
+    color:var(--black); background:var(--gold);
+    padding:10px 20px; border-radius:2px; text-decoration:none;
+    text-transform:uppercase; font-weight:500;
+    box-shadow:0 0 24px rgba(255,207,92,0.35);
+    transition:transform .3s ease, box-shadow .3s ease;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{ transform:translateY(-2px); box-shadow:0 4px 30px rgba(255,207,92,0.6); }
+  .burger{ display:none; color:var(--cyan); font-size:1.4rem; background:none; border:none; cursor:pointer; }
 
-  .step{display:none;}
-  .step.active{display:block;}
+  /* ===== HERO ===== */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; text-align:center; padding:120px 5vw 60px;
+    perspective:1400px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem; letter-spacing:0.35em;
+    color:var(--cyan-soft); text-transform:uppercase; margin-bottom:22px;
+    display:flex; align-items:center; gap:10px; opacity:0;
+    animation:fadeUp 1s ease .2s forwards;
+  }
+  .eyebrow::before, .eyebrow::after{ content:''; width:34px; height:1px; background:linear-gradient(90deg, transparent, var(--cyan)); }
+  .eyebrow::after{ background:linear-gradient(90deg, var(--cyan), transparent); }
 
-  .chip{font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:var(--muted);}
+  .hero-title{
+    font-family:'Orbitron', sans-serif; font-weight:900;
+    font-size:clamp(3.6rem, 13vw, 11.5rem);
+    letter-spacing:0.02em; line-height:0.9;
+    transform-style:preserve-3d;
+    position:relative;
+    background:linear-gradient(180deg,#ffffff 0%, #cfe9ff 18%, #8ee9ff 38%, #6fd3ff 46%, #ffffff 55%, #d9b8ff 72%, #ffffff 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 40px rgba(0,246,255,0.35)) drop-shadow(0 0 90px rgba(167,66,255,0.25));
+    opacity:0;
+    animation:fadeUp 1.2s ease .4s forwards, floatTitle 7s ease-in-out 1.6s infinite;
+  }
+  .hero-title::after{
+    content:'CODE-X'; position:absolute; inset:0;
+    background:linear-gradient(180deg,#fff, #fff); -webkit-background-clip:text; background-clip:text; color:transparent;
+    opacity:0.05; transform:translateZ(-40px) scale(1.03); filter:blur(6px);
+  }
+  @keyframes floatTitle{
+    0%,100%{ transform:rotateX(0deg) rotateY(0deg) translateY(0); }
+    50%{ transform:rotateX(2deg) rotateY(-3deg) translateY(-8px); }
+  }
+  .hero-sub{
+    max-width:620px; margin:34px auto 0; color:var(--muted);
+    font-size:1.05rem; line-height:1.75; font-weight:400;
+    opacity:0; animation:fadeUp 1s ease .7s forwards;
+  }
+  .hero-sub b{ color:var(--text); font-weight:600; }
+  .hero-actions{
+    display:flex; gap:20px; margin-top:44px; flex-wrap:wrap; justify-content:center;
+    opacity:0; animation:fadeUp 1s ease .9s forwards;
+  }
+  .btn-primary, .btn-ghost{
+    font-family:'JetBrains Mono', monospace; font-size:0.78rem; letter-spacing:0.12em;
+    text-transform:uppercase; text-decoration:none; padding:16px 34px; border-radius:2px;
+    position:relative; transition:all .35s ease; display:inline-flex; align-items:center; gap:10px;
+  }
+  .btn-primary{
+    color:var(--black); font-weight:600;
+    background:linear-gradient(120deg, var(--cyan), var(--violet-soft));
+    box-shadow:0 0 30px rgba(0,246,255,0.3);
+  }
+  .btn-primary:hover{ box-shadow:0 0 45px rgba(0,246,255,0.55); transform:translateY(-2px); }
+  .btn-ghost{
+    color:var(--text); border:1px solid var(--glass-border); background:var(--glass);
+    backdrop-filter:blur(10px);
+  }
+  .btn-ghost:hover{ border-color:var(--cyan); color:var(--cyan-soft); box-shadow:0 0 20px rgba(0,246,255,0.15); }
 
-  .float-slow{animation:floaty 6s ease-in-out infinite;}
-  .float-slower{animation:floaty 9s ease-in-out infinite;}
-  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(26px); } to{ opacity:1; transform:translateY(0); } }
 
-  a{-webkit-tap-highlight-color:transparent;}
+  .scroll-hint{
+    margin-top:70px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    color:var(--muted); font-family:'JetBrains Mono', monospace; font-size:0.62rem; letter-spacing:0.2em;
+    opacity:0; animation:fadeUp 1s ease 1.2s forwards;
+  }
+  .scroll-line{ width:1px; height:44px; background:linear-gradient(var(--cyan), transparent); animation:scrollPulse 2s ease-in-out infinite; }
+  @keyframes scrollPulse{ 0%,100%{ opacity:0.2; } 50%{ opacity:1; } }
+
+  /* ===== HOLO DASHBOARD (signature) ===== */
+  .dashboard{
+    width:100%; max-width:1180px; margin:110px auto 0; position:relative;
+    perspective:1600px;
+  }
+  .dash-frame{
+    display:flex; gap:22px; flex-wrap:wrap; justify-content:center;
+    transform-style:preserve-3d;
+  }
+  .service-card{
+    width:210px; min-height:270px; padding:26px 22px;
+    background:linear-gradient(160deg, var(--glass), rgba(255,255,255,0.01));
+    border:1px solid var(--glass-border); border-radius:14px;
+    backdrop-filter:blur(18px);
+    position:relative; overflow:hidden;
+    transform-style:preserve-3d;
+    transition:transform .15s ease, box-shadow .3s ease, border-color .3s ease;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    opacity:0; animation:fadeUp .9s ease forwards;
+  }
+  .service-card:nth-child(1){ animation-delay:1.1s; }
+  .service-card:nth-child(2){ animation-delay:1.25s; }
+  .service-card:nth-child(3){ animation-delay:1.4s; }
+  .service-card:nth-child(4){ animation-delay:1.55s; }
+  .service-card:nth-child(5){ animation-delay:1.7s; }
+  .service-card::before{
+    content:''; position:absolute; top:-2px; left:-2px; right:-2px; height:2px;
+    background:linear-gradient(90deg, var(--cyan), var(--violet), var(--gold));
+    opacity:0.7;
+  }
+  .service-card::after{
+    content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.08), transparent);
+    transition:left .8s ease;
+  }
+  .service-card:hover::after{ left:130%; }
+  .service-card:hover{
+    box-shadow:0 30px 70px rgba(0,0,0,0.6), 0 0 40px var(--card-glow, rgba(0,246,255,0.25)), inset 0 1px 0 rgba(255,255,255,0.1);
+    border-color:var(--card-border, var(--cyan));
+  }
+  .card-glyph{
+    width:44px; height:44px; border-radius:10px; margin-bottom:22px;
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+    background:var(--card-bg, rgba(0,246,255,0.08)); border:1px solid var(--card-border, rgba(0,246,255,0.3));
+    box-shadow:0 0 20px var(--card-glow, rgba(0,246,255,0.2));
+  }
+  .card-tag{
+    font-family:'JetBrains Mono', monospace; font-size:0.62rem; letter-spacing:0.15em;
+    color:var(--card-border, var(--cyan-soft)); text-transform:uppercase; margin-bottom:10px; display:block;
+  }
+  .service-card h3{ font-size:1.08rem; font-weight:600; margin-bottom:10px; line-height:1.3; }
+  .service-card p{ font-size:0.86rem; color:var(--muted); line-height:1.6; }
+  .card-index{
+    position:absolute; bottom:16px; right:20px; font-family:'JetBrains Mono', monospace;
+    font-size:0.62rem; color:rgba(255,255,255,0.18); letter-spacing:0.1em;
+  }
+
+  /* ===== SECTION SCAFFOLDING ===== */
+  section.showcase{
+    padding:170px 5vw; max-width:1280px; margin:0 auto;
+    display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
+  }
+  section.showcase.reverse .sc-visual{ order:2; }
+  section.showcase.reverse .sc-copy{ order:1; }
+  .sc-copy{
+    opacity:0; transform:translateY(40px); transition:opacity .9s ease, transform .9s ease;
+  }
+  .sc-copy.in-view{ opacity:1; transform:translateY(0); }
+  .sc-visual{
+    opacity:0; transform:translateY(40px) scale(0.96); transition:opacity 1s ease .1s, transform 1s ease .1s;
+    position:relative; min-height:420px; display:flex; align-items:center; justify-content:center;
+  }
+  .sc-visual.in-view{ opacity:1; transform:translateY(0) scale(1); }
+
+  .sc-tag{
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem; letter-spacing:0.25em;
+    text-transform:uppercase; margin-bottom:20px; display:inline-block;
+    padding:6px 14px; border:1px solid var(--tag-border, var(--cyan)); border-radius:20px;
+    color:var(--tag-color, var(--cyan-soft)); background:rgba(255,255,255,0.02);
+  }
+  .sc-title{
+    font-family:'Orbitron', sans-serif; font-weight:700; font-size:clamp(1.8rem, 3vw, 2.6rem);
+    line-height:1.2; margin-bottom:22px;
+    background:linear-gradient(120deg,#fff, var(--tag-color, var(--cyan-soft)));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sc-desc{ color:var(--muted); font-size:1rem; line-height:1.85; margin-bottom:30px; max-width:480px; }
+  .sc-list{ list-style:none; display:flex; flex-direction:column; gap:14px; }
+  .sc-list li{ display:flex; align-items:center; gap:12px; font-size:0.92rem; color:var(--text); }
+  .sc-list li::before{
+    content:''; width:7px; height:7px; border-radius:50%; background:var(--tag-color, var(--cyan));
+    box-shadow:0 0 10px var(--tag-color, var(--cyan)); flex-shrink:0;
+  }
+
+  .section-header{
+    text-align:center; max-width:700px; margin:0 auto 80px; padding:0 5vw;
+    opacity:0; transform:translateY(30px); transition:opacity .8s ease, transform .8s ease;
+  }
+  .section-header.in-view{ opacity:1; transform:translateY(0); }
+  .section-header h2{
+    font-family:'Orbitron', sans-serif; font-size:clamp(1.8rem,3.4vw,2.7rem); font-weight:700; margin-bottom:16px;
+  }
+  .section-header p{ color:var(--muted); font-size:1rem; line-height:1.7; }
+
+  /* ===== SHOP VISUAL (rotating product ring) ===== */
+  .shop-stage{ width:320px; height:380px; perspective:1000px; }
+  .shop-ring{
+    width:100%; height:100%; position:relative; transform-style:preserve-3d;
+    animation:spinRing 16s linear infinite;
+  }
+  @keyframes spinRing{ from{ transform:rotateY(0deg); } to{ transform:rotateY(360deg); } }
+  .product-plate{
+    position:absolute; width:150px; height:190px; top:50%; left:50%;
+    margin:-95px 0 0 -75px; border-radius:14px;
+    background:linear-gradient(160deg, rgba(255,207,92,0.14), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,207,92,0.35);
+    backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 30px rgba(255,207,92,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+    font-size:2.4rem;
+  }
+  .p1{ transform:rotateY(0deg) translateZ(170px); }
+  .p2{ transform:rotateY(72deg) translateZ(170px); }
+  .p3{ transform:rotateY(144deg) translateZ(170px); }
+  .p4{ transform:rotateY(216deg) translateZ(170px); }
+  .p5{ transform:rotateY(288deg) translateZ(170px); }
+  .shop-glow{
+    position:absolute; width:260px; height:260px; border-radius:50%; top:50%; left:50%;
+    transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,207,92,0.18), transparent 70%);
+    filter:blur(10px); z-index:-1;
+  }
+
+  /* ===== PROPOSAL VISUAL (hearts) ===== */
+  .hearts-stage{ width:100%; height:420px; position:relative; overflow:hidden; }
+  .propose-card{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:260px; padding:30px 26px; text-align:center; border-radius:16px;
+    background:linear-gradient(160deg, rgba(167,66,255,0.14), rgba(255,255,255,0.02));
+    border:1px solid rgba(167,66,255,0.4); backdrop-filter:blur(14px);
+    box-shadow:0 0 50px rgba(167,66,255,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+    z-index:2;
+  }
+  .propose-card .big-heart{ font-size:2.4rem; margin-bottom:10px; filter:drop-shadow(0 0 14px rgba(167,66,255,0.7)); }
+  .propose-card .q{ font-family:'Orbitron', sans-serif; font-size:1.15rem; margin-bottom:8px; }
+  .propose-card .yn{ display:flex; gap:10px; justify-content:center; margin-top:16px; }
+  .propose-card .yn span{
+    font-family:'JetBrains Mono', monospace; font-size:0.65rem; padding:8px 16px; border-radius:20px;
+    border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+  }
+  .propose-card .yn span.yes{ border-color:var(--violet); color:var(--violet-soft); box-shadow:0 0 14px rgba(167,66,255,0.4); }
+  .heart-particle{
+    position:absolute; bottom:-30px; color:var(--violet-soft); opacity:0.85;
+    animation:floatHeart linear infinite; filter:drop-shadow(0 0 6px rgba(167,66,255,0.6));
+  }
+  @keyframes floatHeart{
+    0%{ transform:translateY(0) translateX(0) scale(0.6) rotate(0deg); opacity:0; }
+    10%{ opacity:0.9; }
+    100%{ transform:translateY(-460px) translateX(var(--drift,20px)) scale(1.1) rotate(20deg); opacity:0; }
+  }
+
+  /* ===== BIRTHDAY VISUAL (cake + confetti) ===== */
+  .cake-stage{ width:100%; height:420px; position:relative; display:flex; align-items:flex-end; justify-content:center; }
+  #confetti-canvas{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .cake{ position:relative; transform-style:preserve-3d; margin-bottom:30px; }
+  .tier{ border-radius:10px; margin:0 auto; position:relative; }
+  .tier-bottom{ width:190px; height:70px; background:linear-gradient(160deg,#3a1750,#1c0b2e); border:1px solid rgba(167,66,255,0.5); box-shadow:0 0 30px rgba(167,66,255,0.25); }
+  .tier-mid{ width:150px; height:60px; background:linear-gradient(160deg,#502160,#25103a); border:1px solid rgba(0,246,255,0.4); box-shadow:0 0 26px rgba(0,246,255,0.2); margin-top:-6px; }
+  .tier-top{ width:110px; height:50px; background:linear-gradient(160deg,#5c2c73,#2a1140); border:1px solid rgba(255,207,92,0.5); box-shadow:0 0 22px rgba(255,207,92,0.25); margin-top:-6px; }
+  .candle{ width:6px; height:34px; background:linear-gradient(var(--gold-soft),var(--gold)); margin:0 auto; border-radius:2px; position:relative; margin-top:-2px; }
+  .flame{
+    width:12px; height:18px; border-radius:50% 50% 50% 50%/ 60% 60% 40% 40%;
+    background:radial-gradient(circle, #fff6d0, var(--gold) 55%, #ff8a3d 100%);
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+    box-shadow:0 0 20px rgba(255,207,92,0.9), 0 0 50px rgba(255,143,61,0.5);
+    animation:flicker 1.4s ease-in-out infinite;
+  }
+  @keyframes flicker{ 0%,100%{ transform:translateX(-50%) scale(1) rotate(-2deg); } 50%{ transform:translateX(-50%) scale(1.12) rotate(3deg); } }
+
+  /* ===== CHAT VISUAL ===== */
+  .chat-stage{ width:100%; max-width:340px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+  .bubble{
+    max-width:78%; padding:14px 18px; border-radius:16px; font-size:0.88rem; line-height:1.5;
+    backdrop-filter:blur(10px); position:relative; opacity:0; animation:bubbleIn .7s ease forwards;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  }
+  .bubble.left{
+    align-self:flex-start; background:rgba(0,246,255,0.08); border:1px solid rgba(0,246,255,0.35);
+    box-shadow:0 0 20px rgba(0,246,255,0.15); animation-delay:.2s;
+  }
+  .bubble.right{
+    align-self:flex-end; background:rgba(167,66,255,0.1); border:1px solid rgba(167,66,255,0.4);
+    box-shadow:0 0 20px rgba(167,66,255,0.18); animation-delay:.6s;
+  }
+  .bubble.left2{ align-self:flex-start; background:rgba(0,246,255,0.08); border:1px solid rgba(0,246,255,0.35); animation-delay:1s; }
+  @keyframes bubbleIn{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+  .lock-tag{
+    align-self:center; font-family:'JetBrains Mono', monospace; font-size:0.62rem; letter-spacing:0.15em;
+    color:var(--muted); margin-top:6px; display:flex; align-items:center; gap:6px; opacity:0; animation:bubbleIn .7s ease 1.4s forwards;
+  }
+
+  /* ===== DEDICATION VISUAL ===== */
+  .dedi-stage{ width:100%; display:flex; justify-content:center; }
+  .dedi-card{
+    width:300px; padding:36px 30px; border-radius:18px; text-align:center;
+    background:linear-gradient(165deg, rgba(255,207,92,0.1), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,207,92,0.4); backdrop-filter:blur(14px);
+    box-shadow:0 0 50px rgba(255,207,92,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+    position:relative;
+  }
+  .dedi-card .mark{ font-family:'Orbitron', sans-serif; font-size:2rem; color:var(--gold-soft); margin-bottom:10px; }
+  .dedi-card .line{ font-size:0.95rem; line-height:1.7; color:var(--text); font-style:italic; margin-bottom:16px; }
+  .dedi-card .from{ font-family:'JetBrains Mono', monospace; font-size:0.65rem; letter-spacing:0.15em; color:var(--muted); }
+  .dedi-glow{ position:absolute; inset:-40px; background:radial-gradient(circle, rgba(255,207,92,0.12), transparent 70%); z-index:-1; filter:blur(20px); }
+
+  /* ===== CTA / FOOTER ===== */
+  .cta-band{
+    text-align:center; padding:150px 5vw; position:relative;
+    opacity:0; transform:translateY(30px); transition:opacity .9s ease, transform .9s ease;
+  }
+  .cta-band.in-view{ opacity:1; transform:translateY(0); }
+  .cta-band h2{
+    font-family:'Orbitron', sans-serif; font-weight:800; font-size:clamp(2rem,5vw,3.6rem);
+    margin-bottom:24px;
+    background:linear-gradient(100deg,#fff, var(--cyan-soft), var(--violet-soft), #fff);
+    background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:sheen 8s linear infinite;
+  }
+  .cta-band p{ color:var(--muted); max-width:520px; margin:0 auto 40px; line-height:1.7; }
+
+  footer{
+    border-top:1px solid var(--line); padding:50px 5vw 40px;
+    display:flex; flex-wrap:wrap; gap:24px; align-items:center; justify-content:space-between;
+  }
+  footer .f-logo{ font-family:'Orbitron', sans-serif; font-weight:800; letter-spacing:0.1em; color:var(--text); }
+  footer .f-links{ display:flex; gap:26px; list-style:none; flex-wrap:wrap; }
+  footer .f-links a{ color:var(--muted); text-decoration:none; font-size:0.82rem; transition:color .3s; }
+  footer .f-links a:hover{ color:var(--cyan-soft); }
+  footer .f-copy{ color:rgba(255,255,255,0.25); font-family:'JetBrains Mono', monospace; font-size:0.68rem; width:100%; text-align:center; margin-top:20px; }
+
+  @media (max-width:900px){
+    .nav-links{ display:none; }
+    section.showcase{ grid-template-columns:1fr; gap:50px; padding:110px 6vw; }
+    section.showcase.reverse .sc-visual{ order:1; }
+    section.showcase.reverse .sc-copy{ order:2; }
+    .service-card{ width:44vw; min-height:230px; }
+  }
+  @media (max-width:560px){
+    .service-card{ width:80vw; }
+    .dashboard{ margin-top:70px; }
+  }
 
   @media (prefers-reduced-motion: reduce){
-    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
   }
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div class="grid-overlay"></div>
-<div class="noise"></div>
+<div class="grain"></div>
+<div class="vignette"></div>
 
-<!-- ============ NAVBAR ============ -->
-<header id="navbar">
-  <a href="#home" class="logo-mark">CODE-<span>X</span> AI</a>
-  <nav class="hidden md:flex items-center gap-8">
-    <a class="nav-link" href="#about">about</a>
-    <a class="nav-link" href="#how">how_it_works</a>
-    <a class="nav-link" href="#modes">coaching_modes</a>
-    <a class="nav-link" href="#pricing">pricing</a>
-    <a class="nav-link" href="#contact">contact</a>
-  </nav>
-  <button class="btn-3d-ghost !py-2.5 !px-5 text-xs" onclick="openLogin()">launch_coach →</button>
-</header>
+<nav id="nav">
+  <div class="logo">CODE-X</div>
+  <ul class="nav-links">
+    <li><a href="#shop">Shop</a></li>
+    <li><a href="#proposals">Proposals</a></li>
+    <li><a href="#birthday">Birthday</a></li>
+    <li><a href="#romance">Romance</a></li>
+    <li><a href="#chat">Chat</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Start Project</a>
+</nav>
 
-<main id="home">
+<main>
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="eyebrow mono">Digital Creative Studio</div>
+    <h1 class="hero-title" id="hero-title">CODE-X</h1>
+    <p class="hero-sub">We engineer <b>storefronts, proposals, birthdays, love letters, and private worlds</b> as if they were luxury hardware — precise, immersive, unforgettable.</p>
+    <div class="hero-actions">
+      <a href="#dashboard" class="btn-primary">Enter the Grid →</a>
+      <a href="#contact" class="btn-ghost">Start a Project</a>
+    </div>
+    <div class="scroll-hint mono"><span>SCROLL</span><div class="scroll-line"></div></div>
 
-  <!-- ============ HERO ============ -->
-  <section class="min-h-screen flex flex-col justify-center items-center text-center pt-32">
-    <div class="eyebrow mb-6">system.boot("code-x")<span class="cursor-blink"></span></div>
-    <h1 class="font-display text-[13vw] md:text-[6.5rem] leading-[0.95] font-900 mb-6">
-      LEVEL UP<br/><span class="text-gradient">YOUR LIFE & CODE</span>
-    </h1>
-    <p class="font-mono text-sm md:text-base text-[--muted] max-w-xl mb-10" style="color:var(--muted)">
-      Code-X AI is a full-stack AI coach — code mentor, career strategist, and mindset guide —
-      built by <span style="color:var(--cyan)">rocky_1029</span>.
-    </p>
-    <div class="flex flex-col sm:flex-row gap-5">
-      <button class="btn-3d" onclick="openLogin()">talk to your ai coach now</button>
-      <a href="#how" class="btn-3d-ghost flex items-center">see how it works</a>
-    </div>
-
-    <!-- floating stat chips -->
-    <div class="flex flex-wrap gap-3 justify-center mt-14">
-      <span class="chip float-slow">⚡ instant code reviews</span>
-      <span class="chip float-slower">🧠 daily mindset resets</span>
-      <span class="chip float-slow">🚀 career roadmap ai</span>
-    </div>
-  </section>
-
-  <!-- ============ FEATURES ============ -->
-  <section id="features">
-    <div class="text-center mb-16">
-      <div class="eyebrow justify-center flex mb-4">features.load()</div>
-      <h2 class="font-display text-4xl md:text-5xl font-700">Everything your growth stack needs</h2>
-    </div>
-    <div id="feature-grid" class="grid md:grid-cols-3 gap-7 max-w-6xl mx-auto">
-      <!-- cards injected via JS template below for consistency -->
-    </div>
-  </section>
-
-  <!-- ============ ABOUT ============ -->
-  <section id="about" class="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-    <div>
-      <div class="eyebrow mb-4">about.md</div>
-      <h2 class="font-display text-4xl font-700 mb-6">One coach. Every part of your growth.</h2>
-      <p class="text-[--muted] leading-relaxed mb-4" style="color:var(--muted)">
-        Code-X AI merges a senior engineering mentor, a career strategist, and a mindset coach
-        into a single conversational interface. It reviews your code, plans your learning path,
-        and checks in on how you're actually doing — not just what you're shipping.
-      </p>
-      <p class="text-[--muted] leading-relaxed" style="color:var(--muted)">
-        Built solo by <span style="color:var(--pink)">rocky_1029</span>, Code-X AI runs on your
-        own GitHub context so every suggestion is grounded in the code you actually write.
-      </p>
-    </div>
-    <div class="glass-card glow-purple p-8">
-      <div class="font-mono text-xs" style="color:var(--muted)">// mission.json</div>
-      <pre class="font-mono text-sm mt-3 leading-7" style="color:var(--cyan)">{
-  "goal": "compound growth",
-  "domains": ["code","career","mindset"],
-  "powered_by": "advanced ai",
-  "built_by": "rocky_1029"
-}</pre>
-    </div>
-  </section>
-
-  <!-- ============ HOW IT WORKS ============ -->
-  <section id="how">
-    <div class="text-center mb-16">
-      <div class="eyebrow justify-center flex mb-4">how_it_works.run()</div>
-      <h2 class="font-display text-4xl md:text-5xl font-700">Three steps to your next level</h2>
-    </div>
-    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      <div class="glass-card p-8">
-        <div class="font-mono text-xs mb-4" style="color:var(--pink)">step_01</div>
-        <h3 class="font-display text-xl mb-3">Connect</h3>
-        <p style="color:var(--muted)" class="text-sm leading-relaxed">Sign in and link your GitHub token so Code-X can see the projects you're actually working on.</p>
-      </div>
-      <div class="glass-card p-8">
-        <div class="font-mono text-xs mb-4" style="color:var(--purple)">step_02</div>
-        <h3 class="font-display text-xl mb-3">Tell it your goal</h3>
-        <p style="color:var(--muted)" class="text-sm leading-relaxed">Tell your coach what you're leveling up — a skill, a career move, a habit, a mindset.</p>
-      </div>
-      <div class="glass-card p-8">
-        <div class="font-mono text-xs mb-4" style="color:var(--cyan)">step_03</div>
-        <h3 class="font-display text-xl mb-3">Get a plan you can share</h3>
-        <p style="color:var(--muted)" class="text-sm leading-relaxed">Generate a shareable coaching session link and track your progress over time.</p>
+    <div class="dashboard" id="dashboard">
+      <div class="dash-frame" id="cardFrame">
+        <div class="service-card" style="--card-glow:rgba(255,207,92,0.3); --card-border:rgba(255,207,92,0.5); --card-bg:rgba(255,207,92,0.1);">
+          <div class="card-glyph">🛍️</div>
+          <span class="card-tag mono" style="color:var(--gold-soft)">SYS.SHOP</span>
+          <h3>Shop Advertising</h3>
+          <p>Storefronts and campaigns built to convert like a flagship drop.</p>
+          <span class="card-index mono">01</span>
+        </div>
+        <div class="service-card" style="--card-glow:rgba(167,66,255,0.3); --card-border:rgba(167,66,255,0.5); --card-bg:rgba(167,66,255,0.1);">
+          <div class="card-glyph">💍</div>
+          <span class="card-tag mono" style="color:var(--violet-soft)">SYS.ASK</span>
+          <h3>Proposal Websites</h3>
+          <p>One page, one question, engineered to get a yes.</p>
+          <span class="card-index mono">02</span>
+        </div>
+        <div class="service-card" style="--card-glow:rgba(0,246,255,0.3); --card-border:rgba(0,246,255,0.5); --card-bg:rgba(0,246,255,0.1);">
+          <div class="card-glyph">🎂</div>
+          <span class="card-tag mono">SYS.BDAY</span>
+          <h3>Birthday Wishes</h3>
+          <p>Turn a birthday into a full sensory event, online.</p>
+          <span class="card-index mono">03</span>
+        </div>
+        <div class="service-card" style="--card-glow:rgba(255,207,92,0.3); --card-border:rgba(255,207,92,0.5); --card-bg:rgba(255,207,92,0.1);">
+          <div class="card-glyph">💌</div>
+          <span class="card-tag mono" style="color:var(--gold-soft)">SYS.LOVE</span>
+          <h3>Romantic Dedications</h3>
+          <p>Say it in pixels and light — kept forever, not scrolled past.</p>
+          <span class="card-index mono">04</span>
+        </div>
+        <div class="service-card" style="--card-glow:rgba(0,246,255,0.3); --card-border:rgba(0,246,255,0.5); --card-bg:rgba(0,246,255,0.1);">
+          <div class="card-glyph">🔒</div>
+          <span class="card-tag mono">SYS.CHAT</span>
+          <h3>Private Chat Platform</h3>
+          <p>Encrypted rooms built for exactly two people.</p>
+          <span class="card-index mono">05</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ COACHING MODES ============ -->
-  <section id="modes">
-    <div class="text-center mb-16">
-      <div class="eyebrow justify-center flex mb-4">select_mode --list</div>
-      <h2 class="font-display text-4xl md:text-5xl font-700">Four coaches. One brain.</h2>
+  <div class="section-header" data-reveal>
+    <h2>Five systems. One studio.</h2>
+    <p>Every build below runs on the same core: cinematic motion, glass-clean UI, and copy that actually says what it means.</p>
+  </div>
+
+  <!-- SHOP -->
+  <section class="showcase" id="shop">
+    <div class="sc-copy" data-reveal>
+      <span class="sc-tag mono" style="--tag-border:var(--gold); --tag-color:var(--gold-soft);">Sys.Shop — 01</span>
+      <h2 class="sc-title" style="--tag-color:var(--gold-soft)">Shop Advertising</h2>
+      <p class="sc-desc">Product pages and ad campaigns that treat every SKU like the hero of its own launch film. Built for scroll-stopping first frames and checkout-ready last frames.</p>
+      <ul class="sc-list">
+        <li>Rotating product staging with studio lighting</li>
+        <li>Campaign pages tuned for paid social and search</li>
+        <li>Conversion-first layout, luxury-first finish</li>
+      </ul>
     </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto" id="modes-grid"></div>
-  </section>
-
-  <!-- ============ AI CHAT DEMO / LOGIN GATE SECTION ============ -->
-  <section id="demo" class="text-center">
-    <div class="eyebrow justify-center flex mb-4">ai_chat --demo</div>
-    <h2 class="font-display text-4xl md:text-5xl font-700 mb-6">Your coach is one login away</h2>
-    <p class="max-w-xl mx-auto mb-10 text-sm" style="color:var(--muted)">
-      Sign in, tell Code-X your name and your goal, link a GitHub token, then generate
-      a shareable session link you can send anywhere.
-    </p>
-    <button class="btn-3d" onclick="openLogin()">open ai chat</button>
-  </section>
-
-  <!-- ============ TESTIMONIALS ============ -->
-  <section id="testimonials">
-    <div class="text-center mb-16">
-      <div class="eyebrow justify-center flex mb-4">testimonials.fetch()</div>
-      <h2 class="font-display text-4xl md:text-5xl font-700">Builders leveling up</h2>
+    <div class="sc-visual" data-reveal>
+      <div class="shop-stage">
+        <div class="shop-glow"></div>
+        <div class="shop-ring">
+          <div class="product-plate p1">👟</div>
+          <div class="product-plate p2">⌚</div>
+          <div class="product-plate p3">🕶️</div>
+          <div class="product-plate p4">👜</div>
+          <div class="product-plate p5">💎</div>
+        </div>
+      </div>
     </div>
-    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" id="testi-grid"></div>
   </section>
 
-  <!-- ============ PRICING ============ -->
-  <section id="pricing">
-    <div class="text-center mb-16">
-      <div class="eyebrow justify-center flex mb-4">pricing.select()</div>
-      <h2 class="font-display text-4xl md:text-5xl font-700">Pick your track</h2>
+  <!-- PROPOSALS -->
+  <section class="showcase reverse" id="proposals">
+    <div class="sc-copy" data-reveal>
+      <span class="sc-tag mono" style="--tag-border:var(--violet); --tag-color:var(--violet-soft);">Sys.Ask — 02</span>
+      <h2 class="sc-title" style="--tag-color:var(--violet-soft)">Proposal Websites</h2>
+      <p class="sc-desc">A single page built around one question, with the timeline, photos, and countdown that make "yes" the only possible answer — before you even get down on one knee.</p>
+      <ul class="sc-list">
+        <li>Cinematic reveal sequence with your own photos</li>
+        <li>Shareable link that plays like a short film</li>
+        <li>Optional live RSVP for the "after"</li>
+      </ul>
     </div>
-    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" id="pricing-grid"></div>
+    <div class="sc-visual" data-reveal>
+      <div class="hearts-stage" id="heartsStage">
+        <div class="propose-card">
+          <div class="big-heart">💜</div>
+          <div class="q display">Will you?</div>
+          <p style="color:var(--muted); font-size:0.85rem;">Six years, one question.</p>
+          <div class="yn"><span class="yes">YES</span><span>ASK AGAIN</span></div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- ============ CONTACT ============ -->
-  <section id="contact" class="max-w-2xl mx-auto text-center">
-    <div class="eyebrow justify-center flex mb-4">contact.send()</div>
-    <h2 class="font-display text-4xl font-700 mb-6">Get in touch</h2>
-    <p class="mb-10 text-sm" style="color:var(--muted)">Questions, partnerships, feedback — reach the creator directly.</p>
-    <form class="glass-card p-8 text-left space-y-4" onsubmit="event.preventDefault(); this.querySelector('.done-msg').style.display='block';">
-      <input type="text" placeholder="your name" required>
-      <input type="text" placeholder="your email" required>
-      <textarea placeholder="message" rows="4" required style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none;"></textarea>
-      <button class="btn-3d w-full" type="submit">send message</button>
-      <p class="done-msg font-mono text-xs" style="display:none;color:var(--cyan)">// message queued — rocky_1029 will reply soon</p>
-    </form>
+  <!-- BIRTHDAY -->
+  <section class="showcase" id="birthday">
+    <div class="sc-copy" data-reveal>
+      <span class="sc-tag mono" style="--tag-border:var(--cyan); --tag-color:var(--cyan-soft);">Sys.Bday — 03</span>
+      <h2 class="sc-title" style="--tag-color:var(--cyan-soft)">Birthday Wishes</h2>
+      <p class="sc-desc">A birthday page with a pulse: confetti on arrival, a cake that actually lights up, and a wall of messages from everyone who loves them — all in one link.</p>
+      <ul class="sc-list">
+        <li>Confetti burst timed to page load</li>
+        <li>Animated cake with blow-out interaction</li>
+        <li>Collected messages from friends & family</li>
+      </ul>
+    </div>
+    <div class="sc-visual" data-reveal id="cakeVisual">
+      <canvas id="confetti-canvas"></canvas>
+      <div class="cake-stage">
+        <div class="cake">
+          <div class="candle"><div class="flame"></div></div>
+          <div class="tier tier-top"></div>
+          <div class="tier tier-mid"></div>
+          <div class="tier tier-bottom"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- ROMANCE -->
+  <section class="showcase reverse" id="romance">
+    <div class="sc-copy" data-reveal>
+      <span class="sc-tag mono" style="--tag-border:var(--gold); --tag-color:var(--gold-soft);">Sys.Love — 04</span>
+      <h2 class="sc-title" style="--tag-color:var(--gold-soft)">Romantic Dedications</h2>
+      <p class="sc-desc">Not a card, not a caption — a page built around one person, one feeling, kept somewhere better than a phone gallery. Words, photos, and a soundtrack, held in light.</p>
+      <ul class="sc-list">
+        <li>Handwritten-feel typography for your own words</li>
+        <li>Timeline of moments, dates, and photos</li>
+        <li>Private link only they can open</li>
+      </ul>
+    </div>
+    <div class="sc-visual" data-reveal>
+      <div class="dedi-stage">
+        <div class="dedi-card">
+          <div class="dedi-glow"></div>
+          <div class="mark">"</div>
+          <p class="line">Every version of my life that I'm proud of has you in it.</p>
+          <p class="from">— FOR R., SINCE 03.14</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="showcase" id="chat">
+    <div class="sc-copy" data-reveal>
+      <span class="sc-tag mono" style="--tag-border:var(--cyan); --tag-color:var(--cyan-soft);">Sys.Chat — 05</span>
+      <h2 class="sc-title" style="--tag-color:var(--cyan-soft)">Private Chat Platform</h2>
+      <p class="sc-desc">A room built for exactly two people. End-to-end encrypted, no ads, no algorithm — just a clean, glowing space to talk that disappears the moment you close it.</p>
+      <ul class="sc-list">
+        <li>End-to-end encrypted, invite-only rooms</li>
+        <li>Self-destructing messages on request</li>
+        <li>Custom themes for your own private world</li>
+      </ul>
+    </div>
+    <div class="sc-visual" data-reveal>
+      <div class="chat-stage">
+        <div class="bubble left">hey. you awake?</div>
+        <div class="bubble right">always, for you 🌙</div>
+        <div class="bubble left2">good. i built us something</div>
+        <div class="lock-tag mono">🔒 END-TO-END ENCRYPTED</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-band" data-reveal id="contact">
+    <h2>Let's build your system.</h2>
+    <p>Tell us what you're building — a store, a proposal, a birthday, a love letter, or a room for two — and we'll design it like it's the only thing on the internet.</p>
+    <a href="mailto:hello@code-x.studio" class="btn-primary">hello@code-x.studio</a>
+  </section>
+
+  <footer>
+    <div class="f-logo">CODE-X</div>
+    <ul class="f-links">
+      <li><a href="#shop">Shop</a></li>
+      <li><a href="#proposals">Proposals</a></li>
+      <li><a href="#birthday">Birthday</a></li>
+      <li><a href="#romance">Romance</a></li>
+      <li><a href="#chat">Chat</a></li>
+    </ul>
+    <div class="f-copy">© 2026 CODE-X STUDIO — ALL SYSTEMS ENCRYPTED, ALL PIXELS INTENTIONAL.</div>
+  </footer>
 </main>
 
-<footer class="text-center py-10 font-mono text-xs" style="color:var(--muted)">
-  <div class="term-rule mb-8"></div>
-  © 2026 CODE-X AI — built by rocky_1029. All systems nominal.
-</footer>
-
-<!-- ============ LOGIN / TOKEN / GENERATE MODAL ============ -->
-<div class="modal-backdrop" id="loginModal">
-  <div class="modal-box glass-card glow-cyan p-8" id="modalContent">
-
-    <!-- STEP 1: login -->
-    <div class="step active" id="step-login">
-      <div class="eyebrow mb-4">auth.login()</div>
-      <h3 class="font-display text-2xl mb-6">Access Code-X AI</h3>
-      <div class="space-y-4">
-        <input type="text" id="loginUser" placeholder="username" autocomplete="off">
-        <input type="password" id="loginPass" placeholder="password">
-        <p id="loginError" class="font-mono text-xs" style="color:var(--pink);display:none;">// access denied — check credentials</p>
-        <button class="btn-3d w-full" onclick="tryLogin()">sign in</button>
-      </div>
-      <p class="font-mono text-[11px] mt-5" style="color:var(--muted)">demo credentials → username: <span style="color:var(--cyan)">code-x</span> · password: <span style="color:var(--cyan)">1234</span></p>
-    </div>
-
-    <!-- STEP 2: profile -->
-    <div class="step" id="step-profile">
-      <div class="eyebrow mb-4">session.init()</div>
-      <h3 class="font-display text-2xl mb-6">Set up your coach</h3>
-      <div class="space-y-4">
-        <input type="text" id="userName" placeholder="your name">
-        <input type="text" id="userGoal" placeholder="what are you leveling up? (code / career / mindset / life)">
-        <input type="password" id="ghToken" placeholder="github personal access token">
-        <p class="font-mono text-[11px] leading-relaxed" style="color:var(--muted)">
-          // your token stays in this browser tab and is sent only to api.github.com to
-          create a gist. it is never stored or sent anywhere else.
-        </p>
-        <p id="profileError" class="font-mono text-xs" style="color:var(--pink);display:none;"></p>
-        <button class="btn-3d w-full" id="generateBtn" onclick="generateLink()">generate shareable link</button>
-      </div>
-    </div>
-
-    <!-- STEP 3: result -->
-    <div class="step" id="step-result">
-      <div class="eyebrow mb-4">link.ready()</div>
-      <h3 class="font-display text-2xl mb-6">Your session is live</h3>
-      <p class="font-mono text-xs mb-4" style="color:var(--muted)">share this link — it points to a gist, never to your token:</p>
-      <div class="flex gap-2 mb-6">
-        <input type="text" id="resultLink" readonly style="flex:1;">
-        <button class="btn-3d-ghost !py-3 !px-4 text-xs" onclick="copyLink()">copy</button>
-      </div>
-      <a id="openLinkBtn" class="btn-3d w-full block text-center" href="#" target="_blank" rel="noopener">open session ↗</a>
-    </div>
-
-    <button class="font-mono text-xs mt-6 block mx-auto" style="color:var(--muted)" onclick="closeLogin()">close ✕</button>
-  </div>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* =========================================================
-   CONTENT — feature / modes / testimonials / pricing data
-   ========================================================= */
-const features = [
-  {t:"AI Code Mentor", d:"Real-time reviews, refactors and explanations grounded in your own repos.", g:"glow-cyan", c:"01"},
-  {t:"Personalized Learning Path", d:"A roadmap that reshapes itself around what you actually struggle with.", g:"glow-purple", c:"02"},
-  {t:"Daily Coaching", d:"Short, sharp check-ins that keep momentum without the burnout.", g:"glow-pink", c:"03"},
-  {t:"Progress Tracker", d:"See skill growth, streaks and wins mapped over time.", g:"glow-cyan", c:"04"},
-  {t:"Voice Mode", d:"Talk through a hard problem out loud, hands-free.", g:"glow-purple", c:"05"},
-  {t:"Shareable Sessions", d:"Turn any coaching session into a link you can send or revisit.", g:"glow-pink", c:"06"},
-];
-const grid = document.getElementById('feature-grid');
-features.forEach(f=>{
-  grid.insertAdjacentHTML('beforeend', `
-    <div class="glass-card ${f.g} p-8 tilt-card feature-card">
-      <div class="font-mono text-xs mb-6" style="color:var(--muted)">${f.c}</div>
-      <h3 class="font-display text-lg mb-3">${f.t}</h3>
-      <p class="text-sm leading-relaxed" style="color:var(--muted)">${f.d}</p>
-    </div>`);
-});
-
-const modes = [
-  {t:"Life Coaching", d:"Habits, energy, focus — the operating system behind everything else.", e:"🌱"},
-  {t:"Coding Mentor", d:"Senior-level review and pairing on real code, any stack.", e:"💻"},
-  {t:"Career Coach", d:"Roadmaps, resumes, and interview prep tuned to your target role.", e:"📈"},
-  {t:"Mindset AI", d:"Reframe setbacks, manage pressure, build real confidence.", e:"🧠"},
-];
-const modesGrid = document.getElementById('modes-grid');
-modes.forEach(m=>{
-  modesGrid.insertAdjacentHTML('beforeend', `
-    <div class="glass-card p-7 tilt-card feature-card text-center">
-      <div class="text-4xl mb-4">${m.e}</div>
-      <h3 class="font-display text-base mb-2">${m.t}</h3>
-      <p class="text-xs leading-relaxed" style="color:var(--muted)">${m.d}</p>
-    </div>`);
-});
-
-const testis = [
-  {n:"Maya R.", r:"Frontend Engineer", q:"Code-X caught a race condition my whole team missed. It felt like a senior dev on call 24/7."},
-  {n:"Devon K.", r:"CS Student", q:"The daily coaching check-ins are the only reason I stayed consistent this semester."},
-  {n:"Priya S.", r:"Career Switcher", q:"Went from tutorials to a real offer in ten weeks with the career track."},
-];
-const testiGrid = document.getElementById('testi-grid');
-testis.forEach(t=>{
-  testiGrid.insertAdjacentHTML('beforeend', `
-    <div class="flip-outer h-56">
-      <div class="flip-inner h-full">
-        <div class="flip-face glass-card p-7 flex flex-col justify-center items-center text-center">
-          <div class="text-3xl mb-3">★★★★★</div>
-          <h4 class="font-display text-sm">${t.n}</h4>
-          <p class="font-mono text-[11px]" style="color:var(--muted)">${t.r}</p>
-        </div>
-        <div class="flip-face flip-back glass-card glow-purple p-7 flex items-center">
-          <p class="text-sm leading-relaxed italic">"${t.q}"</p>
-        </div>
-      </div>
-    </div>`);
-});
-
-const plans = [
-  {n:"Starter", p:"$0", d:"Get a feel for your AI coach.", f:["Daily check-in","Community access","1 coaching mode"], g:"glow-cyan"},
-  {n:"Pro", p:"$19/mo", d:"For builders who want compounding growth.", f:["All 4 coaching modes","GitHub-aware reviews","Shareable sessions","Progress tracker"], g:"glow-purple", pop:true},
-  {n:"Elite", p:"$49/mo", d:"Full access, priority everything.", f:["Everything in Pro","Voice mode","1:1 escalation to rocky_1029","Early features"], g:"glow-pink"},
-];
-const pricingGrid = document.getElementById('pricing-grid');
-plans.forEach(p=>{
-  pricingGrid.insertAdjacentHTML('beforeend', `
-    <div class="glass-card ${p.g} p-8 tilt-card feature-card relative ${p.pop?'md:-translate-y-4':''}">
-      ${p.pop?'<div class="chip absolute -top-3 left-1/2 -translate-x-1/2" style="border-color:var(--purple);color:var(--purple)">most popular</div>':''}
-      <h3 class="font-display text-xl mb-1">${p.n}</h3>
-      <div class="font-display text-3xl mb-4 text-gradient">${p.p}</div>
-      <p class="text-xs mb-6" style="color:var(--muted)">${p.d}</p>
-      <ul class="space-y-2 mb-8 text-sm">
-        ${p.f.map(x=>`<li style="color:var(--muted)">— ${x}</li>`).join('')}
-      </ul>
-      <button class="btn-3d-ghost w-full" onclick="openLogin()">choose ${p.n.toLowerCase()}</button>
-    </div>`);
-});
-
-/* =========================================================
-   NAVBAR scroll state
-   ========================================================= */
-const nav = document.getElementById('navbar');
-window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 40));
-
-/* =========================================================
-   3D tilt on hover for cards
-   ========================================================= */
-document.querySelectorAll('.tilt-card').forEach(card=>{
-  card.addEventListener('mousemove', e=>{
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left)/r.width - .5;
-    const y = (e.clientY - r.top)/r.height - .5;
-    card.style.transform = `rotateY(${x*14}deg) rotateX(${-y*14}deg) translateY(-6px)`;
-  });
-  card.addEventListener('mouseleave', ()=> card.style.transform = 'rotateY(0) rotateX(0) translateY(0)');
-});
-
-/* =========================================================
-   GSAP scroll-triggered reveals
-   ========================================================= */
-gsap.registerPlugin(ScrollTrigger);
-gsap.utils.toArray('section').forEach(sec=>{
-  gsap.from(sec.querySelectorAll('h2, .glass-card, form'), {
-    opacity:0, y:40, duration:.9, ease:'power3.out', stagger:.08,
-    scrollTrigger:{trigger:sec, start:'top 78%'}
-  });
-});
-
-/* =========================================================
-   THREE.JS — rotating wireframe "X" + particle field
-   ========================================================= */
-(function initScene(){
+/* ============ THREE.JS BACKGROUND ============ */
+(function(){
   const canvas = document.getElementById('bg-canvas');
-  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, .1, 100);
-  camera.position.z = 9;
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
+  camera.position.set(0, 40, 260);
 
-  // glowing "X" made of two crossed extruded boxes (wireframe + solid core)
-  const xGroup = new THREE.Group();
-  const barGeo = new THREE.BoxGeometry(0.5, 6.2, 0.5);
-  const matCyan = new THREE.MeshBasicMaterial({color:0x22D3EE, wireframe:true});
-  const matPurple = new THREE.MeshBasicMaterial({color:0xA855F7, wireframe:true});
-
-  const bar1 = new THREE.Mesh(barGeo, matCyan); bar1.rotation.z = Math.PI/4;
-  const bar2 = new THREE.Mesh(barGeo, matPurple); bar2.rotation.z = -Math.PI/4;
-  xGroup.add(bar1, bar2);
-  scene.add(xGroup);
-
-  // AI orb
-  const orbGeo = new THREE.IcosahedronGeometry(1.15, 1);
-  const orbMat = new THREE.MeshBasicMaterial({color:0xEC4899, wireframe:true, transparent:true, opacity:.55});
-  const orb = new THREE.Mesh(orbGeo, orbMat);
-  orb.position.set(3.4, -1.6, -2);
-  scene.add(orb);
-
-  // particle field
-  const particleCount = window.innerWidth < 768 ? 350 : 900;
-  const pGeo = new THREE.BufferGeometry();
-  const positions = new Float32Array(particleCount*3);
-  for(let i=0;i<particleCount;i++){
-    positions[i*3] = (Math.random()-0.5)*30;
-    positions[i*3+1] = (Math.random()-0.5)*30;
-    positions[i*3+2] = (Math.random()-0.5)*30;
+  // Particle field
+  const particleCount = 1400;
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+  const cyan = new THREE.Color(0x00f6ff);
+  const violet = new THREE.Color(0xa742ff);
+  const gold = new THREE.Color(0xffcf5c);
+  for(let i=0; i<particleCount; i++){
+    positions[i*3] = (Math.random()-0.5) * 1400;
+    positions[i*3+1] = (Math.random()-0.5) * 900;
+    positions[i*3+2] = (Math.random()-0.5) * 1400;
+    const c = Math.random();
+    const col = c < 0.45 ? cyan : c < 0.8 ? violet : gold;
+    colors[i*3] = col.r; colors[i*3+1] = col.g; colors[i*3+2] = col.b;
   }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
-  const pMat = new THREE.PointsMaterial({color:0x22D3EE, size:.045, transparent:true, opacity:.6});
-  const particles = new THREE.Points(pGeo, pMat);
-  scene.add(particles);
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  pGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pMat = new THREE.PointsMaterial({ size:1.6, vertexColors:true, transparent:true, opacity:0.75, blending:THREE.AdditiveBlending, depthWrite:false });
+  const points = new THREE.Points(pGeo, pMat);
+  scene.add(points);
 
-  let mouseX=0, mouseY=0;
-  window.addEventListener('mousemove', e=>{
-    mouseX = (e.clientX/window.innerWidth - .5);
-    mouseY = (e.clientY/window.innerHeight - .5);
+  // Infinite grid
+  const gridGroup = new THREE.Group();
+  const gridSize = 2000, divisions = 60;
+  const grid1 = new THREE.GridHelper(gridSize, divisions, 0x00f6ff, 0x14202e);
+  grid1.position.y = -180;
+  grid1.material.transparent = true;
+  grid1.material.opacity = 0.28;
+  gridGroup.add(grid1);
+  scene.add(gridGroup);
+
+  // Floating wireframe shapes
+  const shapes = [];
+  const shapeGeos = [ new THREE.IcosahedronGeometry(26,0), new THREE.TorusGeometry(20,5,8,24), new THREE.OctahedronGeometry(22,0) ];
+  const shapeColors = [0x00f6ff, 0xa742ff, 0xffcf5c];
+  for(let i=0;i<9;i++){
+    const geo = shapeGeos[i % shapeGeos.length];
+    const mat = new THREE.MeshBasicMaterial({ color: shapeColors[i % shapeColors.length], wireframe:true, transparent:true, opacity:0.35 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set((Math.random()-0.5)*900, (Math.random()-0.5)*500 - 20, (Math.random()-0.5)*700 - 200);
+    mesh.userData.speed = 0.001 + Math.random()*0.002;
+    mesh.userData.float = Math.random()*Math.PI*2;
+    scene.add(mesh);
+    shapes.push(mesh);
+  }
+
+  let mouseX = 0, mouseY = 0, targetRotX = 0, targetRotY = 0;
+  window.addEventListener('mousemove', (e)=>{
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = (e.clientY / window.innerHeight) * 2 - 1;
   });
 
-  function animate(){
+  function animate(t){
     requestAnimationFrame(animate);
-    xGroup.rotation.y += 0.006;
-    xGroup.rotation.x += 0.002;
-    orb.rotation.y -= 0.008;
-    orb.rotation.x += 0.003;
-    particles.rotation.y += 0.0007;
-    camera.position.x += (mouseX*1.2 - camera.position.x)*0.03;
-    camera.position.y += (-mouseY*1.2 - camera.position.y)*0.03;
+    points.rotation.y += 0.0006;
+    gridGroup.position.z = (t * 0.01) % 60;
+
+    shapes.forEach((m)=>{
+      m.rotation.x += m.userData.speed;
+      m.rotation.y += m.userData.speed * 0.8;
+      m.position.y += Math.sin(t*0.0006 + m.userData.float) * 0.04;
+    });
+
+    targetRotY += (mouseX * 0.25 - targetRotY) * 0.03;
+    targetRotX += (mouseY * 0.15 - targetRotX) * 0.03;
+    camera.position.x += (mouseX * 60 - camera.position.x) * 0.02;
+    camera.position.y += (40 - mouseY * 30 - camera.position.y) * 0.02;
     camera.lookAt(0,0,0);
+
     renderer.render(scene, camera);
   }
-  animate();
+  requestAnimationFrame(animate);
 
   window.addEventListener('resize', ()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
@@ -606,104 +750,110 @@ gsap.utils.toArray('section').forEach(sec=>{
   });
 })();
 
-/* =========================================================
-   LOGIN / PROFILE / GENERATE FLOW
-   =========================================================
-   - Step 1 checks a hardcoded demo login (client-side only demo gate).
-   - Step 2 collects name, goal and a GitHub token.
-   - Generate calls the GitHub REST API DIRECTLY from this page using
-     the token the user typed in. The token is only ever sent to
-     api.github.com and is never written to localStorage or any
-     third-party server. The resulting shareable link points at the
-     created Gist — the token itself is never embedded in the link.
-*/
-function openLogin(){
-  document.getElementById('loginModal').classList.add('open');
-  showStep('step-login');
+/* ============ NAV SCROLL STATE ============ */
+const navEl = document.getElementById('nav');
+window.addEventListener('scroll', ()=>{
+  navEl.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ============ HERO PARALLAX TILT ============ */
+const heroTitle = document.getElementById('hero-title');
+const dashFrame = document.getElementById('cardFrame');
+document.addEventListener('mousemove', (e)=>{
+  const x = (e.clientX / window.innerWidth - 0.5) * 2;
+  const y = (e.clientY / window.innerHeight - 0.5) * 2;
+  heroTitle.style.transform = `rotateY(${x*6}deg) rotateX(${-y*4}deg)`;
+  dashFrame.style.transform = `rotateY(${x*4}deg) rotateX(${-y*3}deg)`;
+});
+
+/* ============ CARD TILT ON HOVER ============ */
+document.querySelectorAll('.service-card').forEach(card=>{
+  card.addEventListener('mousemove', (e)=>{
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `rotateY(${x*16}deg) rotateX(${-y*16}deg) translateZ(10px)`;
+  });
+  card.addEventListener('mouseleave', ()=>{ card.style.transform = 'rotateY(0) rotateX(0) translateZ(0)'; });
+});
+
+/* ============ SCROLL REVEAL ============ */
+const revealEls = document.querySelectorAll('[data-reveal], .sc-copy, .sc-visual, .section-header, .cta-band');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){ entry.target.classList.add('in-view'); }
+  });
+}, { threshold:0.2 });
+revealEls.forEach(el=> io.observe(el));
+
+/* ============ FLOATING HEARTS ============ */
+const heartsStage = document.getElementById('heartsStage');
+function spawnHeart(){
+  const h = document.createElement('div');
+  h.className = 'heart-particle';
+  h.textContent = Math.random() > 0.5 ? '♥' : '♡';
+  const left = Math.random()*100;
+  const size = 0.8 + Math.random()*1.4;
+  const duration = 5 + Math.random()*4;
+  const drift = (Math.random()-0.5)*120;
+  h.style.left = left + '%';
+  h.style.fontSize = size + 'rem';
+  h.style.setProperty('--drift', drift + 'px');
+  h.style.animationDuration = duration + 's';
+  heartsStage.appendChild(h);
+  setTimeout(()=> h.remove(), duration*1000 + 200);
 }
-function closeLogin(){
-  document.getElementById('loginModal').classList.remove('open');
+setInterval(spawnHeart, 450);
+for(let i=0;i<6;i++) setTimeout(spawnHeart, i*200);
+
+/* ============ CONFETTI (birthday) ============ */
+const confettiCanvas = document.getElementById('confetti-canvas');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiFired = false;
+function resizeConfetti(){
+  const stage = document.getElementById('cakeVisual');
+  confettiCanvas.width = stage.clientWidth;
+  confettiCanvas.height = stage.clientHeight;
 }
-function showStep(id){
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function tryLogin(){
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value.trim();
-  const err = document.getElementById('loginError');
-  if(u === 'code-x' && p === '1234'){
-    err.style.display = 'none';
-    showStep('step-profile');
-  } else {
-    err.style.display = 'block';
-  }
-}
-
-async function generateLink(){
-  const name = document.getElementById('userName').value.trim();
-  const goal = document.getElementById('userGoal').value.trim();
-  const token = document.getElementById('ghToken').value.trim();
-  const err = document.getElementById('profileError');
-  const btn = document.getElementById('generateBtn');
-  err.style.display = 'none';
-
-  if(!name || !goal || !token){
-    err.textContent = '// fill in name, goal and github token';
-    err.style.display = 'block';
-    return;
-  }
-
-  btn.textContent = 'generating…';
-  btn.disabled = true;
-
-  try{
-    const res = await fetch('https://api.github.com/gists', {
-      method: 'POST',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github+json'
-      },
-      body: JSON.stringify({
-        description: `Code-X AI session for ${name}`,
-        public: false,
-        files: {
-          'code-x-session.json': {
-            content: JSON.stringify({
-              name,
-              goal,
-              created: new Date().toISOString(),
-              platform: 'Code-X AI by rocky_1029'
-            }, null, 2)
-          }
-        }
-      })
+function fireConfetti(){
+  resizeConfetti();
+  const colors = ['#00f6ff','#a742ff','#ffcf5c','#ffffff'];
+  confettiParticles = [];
+  for(let i=0;i<140;i++){
+    confettiParticles.push({
+      x: confettiCanvas.width/2, y: confettiCanvas.height*0.3,
+      vx: (Math.random()-0.5)*9, vy: (Math.random()-1.6)*8,
+      size: 3+Math.random()*4, color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*360, vr: (Math.random()-0.5)*10, life:0
     });
-
-    if(!res.ok){
-      throw new Error(res.status === 401 ? 'invalid or expired github token' : `github api error (${res.status})`);
-    }
-
-    const data = await res.json();
-    document.getElementById('resultLink').value = data.html_url;
-    document.getElementById('openLinkBtn').href = data.html_url;
-    showStep('step-result');
-
-  }catch(e){
-    err.textContent = `// ${e.message}`;
-    err.style.display = 'block';
-  }finally{
-    btn.textContent = 'generate shareable link';
-    btn.disabled = false;
   }
 }
-
-function copyLink(){
-  const input = document.getElementById('resultLink');
-  input.select();
-  navigator.clipboard.writeText(input.value);
+function tickConfetti(){
+  cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  confettiParticles.forEach(p=>{
+    p.vy += 0.18; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+    cctx.save();
+    cctx.translate(p.x, p.y); cctx.rotate(p.rot * Math.PI/180);
+    cctx.fillStyle = p.color; cctx.globalAlpha = Math.max(0, 1 - p.life/160);
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.5);
+    cctx.restore();
+  });
+  confettiParticles = confettiParticles.filter(p => p.life < 170);
+  requestAnimationFrame(tickConfetti);
 }
+requestAnimationFrame(tickConfetti);
+const cakeObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting && !confettiFired){
+      confettiFired = true;
+      fireConfetti();
+      setInterval(fireConfetti, 6000);
+    }
+  });
+}, { threshold:0.4 });
+cakeObserver.observe(document.getElementById('cakeVisual'));
+window.addEventListener('resize', resizeConfetti);
 </script>
 </body>
 </html>
